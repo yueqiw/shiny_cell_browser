@@ -32,7 +32,7 @@ function(input, output, session) {
 
     output$plot1 <- renderPlot({
         p <- FeaturePlot(object = umi_seurat_1, features.plot = c(gene_name()),
-                    cols.use = c("lightgrey", "blue"), pt.size = 0.8,
+                    cols.use = c("lightgrey", "blue"), pt.size = 1,
                     reduction.use = "tsne_p30_s4", nCol=1, do.return = TRUE)
         p[[1]]
     }, width = plot_size, height = plot_size)
@@ -62,7 +62,7 @@ function(input, output, session) {
 
     output$plot3 <- renderPlot({
         p <- FeaturePlot(object = umi_seurat_2, features.plot = c(gene_name()),
-                    cols.use = c("lightgrey", "blue"), pt.size = 0.2,
+                    cols.use = c("lightgrey", "blue"), pt.size = 0.4,
                     reduction.use = "tsne_p50_s2", nCol=1, do.return = TRUE)
         p[[1]]
     }, width = plot_size, height = plot_size)
