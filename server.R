@@ -15,7 +15,7 @@ function(input, output, session) {
     })
 
     output$value_1 <- renderPrint({
-        if (gene_name() %in% umi_seurat_1@data %>% rownames()) {
+        if (gene_name() %in% (umi_seurat_1@data %>% rownames())) {
             ""
         } else {
             sprintf("%s is not detected ( < 2 umi's in  < 2 cells) in scSeq dataset.", gene_name())
@@ -45,7 +45,7 @@ function(input, output, session) {
     }, width = plot_size, height = plot_size)
 
     output$value_2 <- renderPrint({
-        if (gene_name() %in% umi_seurat_2@data %>% rownames()) {
+        if (gene_name() %in% (umi_seurat_2@data %>% rownames())) {
             ""
         } else {
             sprintf("%s is not detected ( < 2 umi's in  < 2 cells) in scSeq dataset.", gene_name())
