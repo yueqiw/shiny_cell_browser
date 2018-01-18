@@ -8,6 +8,8 @@ umi_seurat_2 <- readRDS(json_data$file_2)
 
 plot_size <- 500
 
+
+
 function(input, output, session) {
 
     gene_name <- eventReactive(input$submit, {
@@ -38,11 +40,11 @@ function(input, output, session) {
     }, width = plot_size, height = plot_size)
 
     output$plot2 <- renderPlot({
-        a <- gene_name()
         #p <- DimPlot(umi_seurat, reduction.use = "tsne", do.label = T, pt.size = 0.8, label.size = 5, colors.use = rainbow(16), no.legend = T)
         p <- DimPlot(umi_seurat_1, reduction.use = "tsne_p30_s4", do.label = T, pt.size = 0.8, label.size = 6, colors.use = rainbow(n_distinct(umi_seurat_1@ident)), no.legend = T)
         p
     }, width = plot_size, height = plot_size)
+
 
     output$value_2 <- renderPrint({
         if (gene_name() %in% (umi_seurat_2@data %>% rownames())) {
@@ -68,10 +70,10 @@ function(input, output, session) {
     }, width = plot_size, height = plot_size)
 
     output$plot4 <- renderPlot({
-        a <- gene_name()
         #p <- DimPlot(umi_seurat, reduction.use = "tsne", do.label = T, pt.size = 0.8, label.size = 5, colors.use = rainbow(16), no.legend = T)
         p <- DimPlot(umi_seurat_2, reduction.use = "tsne_p50_s2", do.label = T, pt.size = 0.2, label.size = 6, colors.use = rainbow(n_distinct(umi_seurat_2@ident)), no.legend = T)
         p
     }, width = plot_size, height = plot_size)
+
 
 }
