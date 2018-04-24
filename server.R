@@ -4,10 +4,13 @@ library(rjson)
 
 json_data <- fromJSON(file = './config.json')
 umi_seurat_1 <- readRDS(json_data$file_1)
+umi_seurat_1 <- SetAllIdent(umi_seurat_1, json_data$file_1_group)
+reduction_1 <- json_data$file_1_reduction
 umi_seurat_2 <- readRDS(json_data$file_2)
+umi_seurat_2 <- SetAllIdent(umi_seurat_2, json_data$file_2_group)
+reduction_2 <- json_data$file_2_reduction
 
 plot_size <- 500
-
 
 
 function(input, output, session) {
@@ -34,14 +37,14 @@ function(input, output, session) {
 
     output$plot1 <- renderPlot({
         p <- FeaturePlot(object = umi_seurat_1, features.plot = c(gene_name()),
-                    cols.use = c("lightgrey", "blue"), pt.size = 1,
-                    reduction.use = "tsne_p30_s4", nCol=1, do.return = TRUE)
+                    cols.use = c("lightgrey", "red"), pt.size = 2,
+                    reduction.use = reduction_1, nCol=1, do.return = TRUE)
         p[[1]]
     }, width = plot_size, height = plot_size)
 
     output$plot2 <- renderPlot({
         #p <- DimPlot(umi_seurat, reduction.use = "tsne", do.label = T, pt.size = 0.8, label.size = 5, colors.use = rainbow(16), no.legend = T)
-        p <- DimPlot(umi_seurat_1, reduction.use = "tsne_p30_s4", do.label = T, pt.size = 0.8, label.size = 6, colors.use = rainbow(n_distinct(umi_seurat_1@ident)), no.legend = T)
+        p <- DimPlot(umi_seurat_1, reduction.use = reduction_1, do.label = T, pt.size = 1.2, label.size = 6, colors.use = rainbow(n_distinct(umi_seurat_1@ident)), no.legend = T)
         p
     }, width = plot_size, height = plot_size)
 
@@ -64,14 +67,14 @@ function(input, output, session) {
 
     output$plot3 <- renderPlot({
         p <- FeaturePlot(object = umi_seurat_2, features.plot = c(gene_name()),
-                    cols.use = c("lightgrey", "blue"), pt.size = 0.4,
-                    reduction.use = "tsne_p50_s2", nCol=1, do.return = TRUE)
+                    cols.use = c("lightgrey", "red"), pt.size = 0.8,
+                    reduction.use = reduction_2, nCol=1, do.return = TRUE)
         p[[1]]
     }, width = plot_size, height = plot_size)
 
     output$plot4 <- renderPlot({
         #p <- DimPlot(umi_seurat, reduction.use = "tsne", do.label = T, pt.size = 0.8, label.size = 5, colors.use = rainbow(16), no.legend = T)
-        p <- DimPlot(umi_seurat_2, reduction.use = "tsne_p50_s2", do.label = T, pt.size = 0.2, label.size = 6, colors.use = rainbow(n_distinct(umi_seurat_2@ident)), no.legend = T)
+        p <- DimPlot(umi_seurat_2, reduction.use = reduction_2, do.label = T, pt.size = 0.3, label.size = 6, colors.use = rainbow(n_distinct(umi_seurat_2@ident)), no.legend = T)
         p
     }, width = plot_size, height = plot_size)
 

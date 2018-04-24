@@ -1,0 +1,8 @@
+{
+  "file_1" : "data/14468X1_Analysis/cluster_seurat/data_intermediate/seurat_pca_mean-0.05_disp-1200_min-cell-6_regress-negbinom.reg-nUMI-cellcycle_mayer_no-mt-rb-genes_14468X1_cluster_tsne_pc-24_k-15_merged.rds",
+  "file_2" : "data/14741AGG_analysis/cluster_seurat/data_intermediate/seurat_pca_mean-0.03_disp-1200_regress-negbinom.reg-nUMI-cellcycle_mayer-strain_no-mt-rb-genes_14741AGG_all_cluster_tsne_pc-24_k-30_merged.rds",
+  "file_1_group" : "res.2_merge3_reorder1",
+  "file_2_group" : "res.1.6_merge2_reorder1",
+  "file_1_reduction": "tsne_p30_s5",
+  "file_1_reduction": "tsne_p50_s4"
+}
