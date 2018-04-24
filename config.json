@@ -4,5 +4,5 @@
   "file_1_group" : "res.2_merge3_reorder1",
   "file_2_group" : "res.1.6_merge2_reorder1",
   "file_1_reduction": "tsne_p30_s5",
-  "file_1_reduction": "tsne_p50_s4"
+  "file_2_reduction": "tsne_p50_s4"
 }
