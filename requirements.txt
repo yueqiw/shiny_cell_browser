@@ -1,0 +1,5 @@
+R==3.4.3
+Seurat==2.2.0
+rjson==0.2.15
+shiny==1.0.5
+tidyverse==1.2.1
