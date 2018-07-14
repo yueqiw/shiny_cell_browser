@@ -3,6 +3,7 @@ config.json
 
 # Data files
 data/
+assets/screenshots
 
 # History files
 .Rhistory
