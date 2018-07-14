@@ -4,3 +4,8 @@ rjson==0.2.15
 shiny==1.1.0
 shinyjs==1.0
 tidyverse==1.2.1
+ggplot2==2.2.1
+
+For plotly interactive mode, require ggplot2 3.0.0 and developmental branch of plotly
+ggplot2==3.0.0
+plotly==4.7.1
