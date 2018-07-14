@@ -1,9 +1,9 @@
 library(shiny)
 library(shinyjs)
-#library(plotly)
+library(plotly)
 column_size <- 6
-plot_width <- "100%"
-plot_height <- "auto"
+ui_plot_width <- "100%"
+ui_plot_height <- "auto"
 
 shinyUI(fluidPage(
     useShinyjs(),
@@ -25,9 +25,11 @@ shinyUI(fluidPage(
                         choices = "",
                         options = list(placeholder = 'Select a gene')
                     ),
-            textAreaInput("gene_list", NULL, "",
+            textAreaInput("gene_list", NULL, "", placeholder = "Add gene list here",
                         height = '80px'),
             fluidRow(column(12, actionButton("gene_list_submit", "Plot Gene list"), align="center")),
+            radioButtons("plot_type", "Plot type:", choices = c("Static" = "ggplot2", "Interactive" = "plotly"),
+                            selected = "ggplot2", inline = TRUE),
             checkboxInput("featureplot_check", "Always show 2D gene plot", value = FALSE),
             checkboxInput("figure_scaling_check", "Auto scale figure size", value = TRUE),
             # checkboxGroupInput("checkboxes", label = NULL,
@@ -62,16 +64,16 @@ shinyUI(fluidPage(
                 column(column_size, uiOutput("description2"), align = 'center')
             ),
             fluidRow(
-                column(column_size, plotOutput("clusterplot1", height = plot_height, width = plot_width), align="center"),
-                column(column_size, plotOutput("clusterplot2", height = plot_height, width = plot_width), align="center")
+                column(column_size, uiOutput("clusterplot1_ui"), align="center"),
+                column(column_size, uiOutput("clusterplot2_ui"), align="center")
             ),
             fluidRow(
-                column(column_size, plotOutput("featureplot1", height = plot_height, width = plot_width), align="center"),
-                column(column_size, plotOutput("featureplot2", height = plot_height, width = plot_width), align="center")
+                column(column_size, uiOutput("featureplot1_ui"), align="center"),
+                column(column_size, uiOutput("featureplot2_ui"), align="center")
             ),
             fluidRow(
-                column(column_size, plotOutput("dotplot1", height = plot_height, width = plot_width), align="center"),
-                column(column_size, plotOutput("dotplot2", height = plot_height, width = plot_width), align="center")
+                column(column_size, uiOutput("dotplot1_ui"), align="center"),
+                column(column_size, uiOutput("dotplot2_ui"), align="center")
             ), width = 9
         ), position = c('left')
     )
