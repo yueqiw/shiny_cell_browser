@@ -1,25 +1,79 @@
+library(shiny)
+library(shinyjs)
+#library(plotly)
 column_size <- 6
-plot_size <- 500
+plot_width <- "100%"
+plot_height <- "auto"
 
-pageWithSidebar(
-    headerPanel('Gene Plot for organoid scSeq'),
-    sidebarPanel(
-        textInput('gene_symbol', h3(HTML('Gene Name<br/>(Ensembl, upper-case)')), value = 'TBR1'),
-        actionButton("submit", "Submit"),
-        width=2
-    ),
-    mainPanel(
-        verbatimTextOutput("value_1"),
-        tableOutput("exp_level_1"),
-        fluidRow(
-            column(column_size, plotOutput("plot1", height = plot_size)),
-            column(column_size, plotOutput("plot2", height = plot_size))
+shinyUI(fluidPage(
+    useShinyjs(),
+    titlePanel('Shiny Single Cell Browser'),
+    sidebarLayout(
+        sidebarPanel(
+            selectizeInput('dataset_1', h4('Datasets'),
+                        selected = NULL,
+                        choices = NULL,
+                        options = list(placeholder = 'Select a dataset')
+                    ),
+            selectizeInput('dataset_2', NULL,
+                        selected = NULL,
+                        choices = NULL,
+                        options = list(placeholder = 'Select a dataset')
+                    ),
+            selectizeInput('gene_symbol', h4('Gene (Ensembl)'),
+                        selected = "",
+                        choices = "",
+                        options = list(placeholder = 'Select a gene')
+                    ),
+            textAreaInput("gene_list", NULL, "",
+                        height = '80px'),
+            fluidRow(column(12, actionButton("gene_list_submit", "Plot Gene list"), align="center")),
+            checkboxInput("featureplot_check", "Always show 2D gene plot", value = FALSE),
+            checkboxInput("figure_scaling_check", "Auto scale figure size", value = TRUE),
+            # checkboxGroupInput("checkboxes", label = NULL,
+            #     choices = list("Always show 2D gene plot" = "featureplot_check",
+            #                     "Auto scale figure size" = "figure_scaling_check"),
+            #     selected = c("figure_scaling_check")),
+            sliderInput("plot_width", "Manual scale figure size",
+                  min = 200, max = 800, value = 500, step = 10, ticks = FALSE),
+            hr(),
+            radioButtons("figure_type", h4(HTML("Download Figure:")),
+                  choiceNames = c("2D Cluster Plot", "Dot Plot", "2D Gene Plot"),
+                  choiceValues = c("clusterplot", "dotplot", "featureplot"), selected = "dotplot", inline = FALSE),
+            fluidRow(
+                column(5, radioButtons("dataset", "Dataset:",
+                      choices = c(1, 2), selected = 1, inline = FALSE)),
+                column(7, radioButtons("filetype", "File Type:",
+                       choices = c("pdf", "png"), selected = "pdf", inline = FALSE))
+            ),
+            fluidRow(column(12, downloadButton('download', 'Download'), align="center")),
+            verbatimTextOutput("value"),  # for debugging purpose only.
+
+            style = "position:fixed;width:inherit;",
+            width=2
         ),
-        verbatimTextOutput("value_2"),
-        tableOutput("exp_level_2"),
-        fluidRow(
-            column(column_size, plotOutput("plot3", height = plot_size)),
-            column(column_size, plotOutput("plot4", height = plot_size))
-        )
+        mainPanel(
+            fluidRow(
+                column(column_size, uiOutput("title1"), align = 'center'),
+                column(column_size, uiOutput("title2"), align = 'center')
+            ),
+            fluidRow(
+                column(column_size, uiOutput("description1"), align = 'center'),
+                column(column_size, uiOutput("description2"), align = 'center')
+            ),
+            fluidRow(
+                column(column_size, plotOutput("clusterplot1", height = plot_height, width = plot_width), align="center"),
+                column(column_size, plotOutput("clusterplot2", height = plot_height, width = plot_width), align="center")
+            ),
+            fluidRow(
+                column(column_size, plotOutput("featureplot1", height = plot_height, width = plot_width), align="center"),
+                column(column_size, plotOutput("featureplot2", height = plot_height, width = plot_width), align="center")
+            ),
+            fluidRow(
+                column(column_size, plotOutput("dotplot1", height = plot_height, width = plot_width), align="center"),
+                column(column_size, plotOutput("dotplot2", height = plot_height, width = plot_width), align="center")
+            ), width = 9
+        ), position = c('left')
     )
+)
 )
