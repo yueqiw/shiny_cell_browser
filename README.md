@@ -3,6 +3,11 @@
 
 Interactive visualization of single cell RNAseq datasets
 
+07-14-2018
+
+  - Add Plotly interactive mode. Click on a gene in the dot plot to show it's distribution on t-SNE/UMAP.
+  - The interactive mode require the new ggplot2 3.0.0 and dev branch of plotly. `devtools::install_github("ropensci/plotly")`
+
 07-13-2018
 
   - Visualize two datasets simultaneously. Can easily switch beteen more datasets from dropdown menu.
