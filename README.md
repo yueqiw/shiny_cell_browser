@@ -23,11 +23,20 @@ Interactive visualization of single cell RNAseq datasets
 
 
 ### Setting up the App
-
+  
+  - To download the App, `git clone git@github.com:yueqiw/shiny_cell_browser.git`
+  - To update, `cd shiny_cell_browser` then `git pull`
   - Store Seurat data objects as `.rds` files 
   - Optionally, store cluster colors as a vector in `seurat_data@misc[[sprintf("%s_colors", cluster_name)]]`
   - Specify the file paths, clustering results and 2D embeddings in `config.json` file. Follow the example in `example_config.json`. The App will automatically open the first two files. 
-  - In Terminal, run `R -e "shiny::runApp('./', port=1234)"` or `run_app.sh`. This should lunch the Single Cell Browser at `http://127.0.0.1:1234/`.  
+  - To launch Single Cell Browser locally: run the following code.  
+  ```
+  cd shiny_cell_browser
+  R -e "shiny::runApp('./', port=1234)
+  ## or store the lunch script in run_app.sh and run the following
+  ./run_app.sh 
+  ```
+  - This should launch the web browser at `http://127.0.0.1:1234/`
   - If you want other computers in the local network to access the web app, run `R -e "shiny::runApp('./', host='0.0.0.0' port=1234)`. Then visit `your-ip-address:1234`
   
 Example `config.json` file: 
