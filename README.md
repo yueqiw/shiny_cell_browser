@@ -3,33 +3,33 @@
 
 Interactive visualization of single cell RNAseq datasets
 
-
 07-14-2018
 
   - Add Plotly interactive mode. Click on a gene in the dot plot to show it's distribution on t-SNE/UMAP.
-  - The interactive mode require the new ggplot2 3.0.0 and dev branch of plotly. `devtools::install_github("ropensci/plotly")`
-  - Non-interactive mode works for both ggplot2 2.2.1 and 3.0.0 
+  - The interactive mode requires the new ggplot2 v3.0.0 and the dev branch of plotly. 
+  - Non-interactive mode works for both ggplot2 v2.2.1 and v3.0.0 
 
 07-13-2018
 
-  - Visualize two datasets simultaneously. Can easily switch beteen more datasets from dropdown menu.
-  - Visualize cluster distribution on UMAP/t-SNE plots.
+  - Visualize two datasets simultaneously. Can easily switch beteen more datasets from the dropdown menu.
+  - Plot cluster distribution on UMAP/t-SNE plots.
   - Plot the expression pattern of individual marker genes on UMAP/t-SNE embeddings.
-  - Plot cluster-averaged expression of gene lists using dot plots.
+  - Plot cluster-averaged expression of marker gene lists using dot plots.
   - Automatic resizing/scaling of figures to fit different browser windows and screen resolutions.
-  - Export publication-quality figures in PDF and PNG formats. (use manual scaling for consistency)
+  - Export publication-quality figures in PDF and PNG formats. (recommend using manual resizing for consistency)
   - Specify pre-analyzed datasets in the JSON config file (see `example_config.json`).
-  - Currently support Seurat format.
+  - Currently support [Seurat](https://github.com/satijalab/seurat) data format.
 
 
 ### Setting up and launch the App
   
-  - To download the App, `git clone git@github.com:yueqiw/shiny_cell_browser.git`
+  - To download the App, `git clone https://github.com/yueqiw/shiny_cell_browser.git`
+  - Install dependencies as listed in the next section. 
   - To update, `cd shiny_cell_browser` then `git pull`
   - Store Seurat data objects as `.rds` files 
   - Optionally, store cluster colors as a vector in `seurat_data@misc[[sprintf("%s_colors", cluster_name)]]`
-  - Specify the file paths, clustering results and 2D embeddings in `config.json` file. Follow the example in `example_config.json`. The App will automatically open the first two files. 
-  - To launch Single Cell Browser locally: run the following code.  
+  - Specify the file paths and clustering results in the `config.json` file. Follow the example in `example_config.json`. The App will automatically open the first two files. 
+  - To launch Single Cell Browser locally, run the following code.  
   ```
   cd shiny_cell_browser
   R -e "shiny::runApp('./', port=1234)
@@ -72,4 +72,5 @@ Example `config.json` file:
 
 For plotly interactive mode, install ggplot2 3.0.0 and developmental branch of plotly
   - ggplot2==3.0.0
-  - plotly==4.7.1
+  - plotly==4.7.1  `devtools::install_github("ropensci/plotly")`
+  
