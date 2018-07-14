@@ -22,7 +22,7 @@ Interactive visualization of single cell RNAseq datasets
   - Currently support Seurat format.
 
 
-### Launch the App
+### Setting up and launch the App
   
   - To download the App, `git clone git@github.com:yueqiw/shiny_cell_browser.git`
   - To update, `cd shiny_cell_browser` then `git pull`
