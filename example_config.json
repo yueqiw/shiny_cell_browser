@@ -1,8 +1,29 @@
 {
-  "file_1" : "path_to_seurat_data_1.rds",
-  "file_2" : "path_to_seurat_data_2.rds",
-  "file_1_group" : "res.1",
-  "file_2_group" : "res.1",
-  "file_1_reduction": "tsne_1",
-  "file_2_reduction": "tsne_1"
+    "data": [
+        {
+            "name": "My favorite sample",
+            "file": "path/to/seurat/data.rds",
+            "clusters": "res.1",
+            "embedding": "umap"
+        },
+        {
+            "name": "My 2nd favorite sample",
+            "file": "path/to/seurat/data.rds",
+            "clusters": "res.1",
+            "embedding": "tsne"
+        },
+        {
+            "name": "Sample 3",
+            "file": "path/to/seurat/data.rds",
+            "clusters": "res.1.2",
+            "embedding": "umap"
+        },
+        {
+            "name": "Sample 4",
+            "file": "path/to/seurat/data.rds",
+            "clusters": "res.0.8",
+            "embedding": "tsne"
+        }
+    ]
+
 }
