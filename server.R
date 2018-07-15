@@ -60,6 +60,7 @@ names(dataset_selector) <- c(dataset_names, "None")
 
 print(dataset_selector)
 # fixed_plot_size <- 500
+dotplot_height <- 500
 
 function(input, output, session) {
     #print(dataset_selector)
@@ -67,28 +68,18 @@ function(input, output, session) {
     updateSelectizeInput(session, 'dataset_1', choices = dataset_selector, selected = dataset_selector[[1]], server = F)
     updateSelectizeInput(session, 'dataset_2', choices = dataset_selector, selected = dataset_selector[[2]], server = F)
 
-    data_1 <- reactiveValues()
-    data_2 <- reactiveValues()
-    seurat_data_1 <- reactiveValues()
-    seurat_data_2 <- reactiveValues()
-    ncells_1 <- reactiveValues()
-    ncells_2 <- reactiveValues()
-    pt_size_1 <- reactiveValues()
-    pt_size_2 <- reactiveValues()
-    colors_1 <- reactiveValues()
-    colors_2 <- reactiveValues()
-    all_genes <- reactiveValues()
+    # No need to use reactiveValues right now.
+    # Note that values taken from the reactiveValues object are reactive, but the reactiveValues object itself is not
 
-    dataset_1 <- reactive(input$dataset_1)
-    dataset_2 <- reactive(input$dataset_2)
+    genes_1 <- NULL
+    genes_2 <- NULL
 
     observeEvent({
         input$dataset_1
-        input$dataset_2
     }, {
-        #print(dataset_1())
-        if (dataset_1() %in% datasets) {
-            data1 <<- json_data[[as.numeric(dataset_1())]]
+        #print(input$dataset_1)
+        if (input$dataset_1 %in% datasets) {
+            data1 <<- json_data[[as.numeric(input$dataset_1)]]
             #print(data1)
             seurat_data_1 <<- readRDS(data1$file)
             seurat_data_1 <<- SetAllIdent(seurat_data_1,  data1$clusters)
@@ -100,11 +91,27 @@ function(input, output, session) {
             genes_1 <- rownames(seurat_data_1@data)
         } else {
             seurat_data_1 <<- NULL
-            genes_1 <- NULL
+            genes_1 <<- NULL
         }
 
-        if (dataset_2() %in% datasets) {
-            data2 <<- json_data[[as.numeric(dataset_2())]]
+        output$featureplot1 <- NULL
+        output$featureplot1_plotly <- NULL
+        output$dotplot1 <- NULL
+        output$dotplot1_plotly <- NULL
+
+        gene_names <<- ""
+        all_genes <<- as.list(c("", sort(union(genes_1, genes_2))))
+        #print(all_genes[1:5])
+
+        updateSelectizeInput(session, 'gene_symbol', choices = all_genes, server = F)
+    })
+
+    observeEvent({
+        input$dataset_2
+    }, {
+
+        if (input$dataset_2 %in% datasets) {
+            data2 <<- json_data[[as.numeric(input$dataset_2)]]
             seurat_data_2 <<- readRDS(data2$file)
             seurat_data_2 <<- SetAllIdent(seurat_data_2, data2$clusters)
             ncells_2 <<- length(seurat_data_2@cell.names)
@@ -115,44 +122,42 @@ function(input, output, session) {
             genes_2 <- rownames(seurat_data_2@data)
         } else {
             seurat_data_2 <<- NULL
-            genes_2 <- NULL
+            genes_2 <<- NULL
         }
 
+        output$featureplot2 <- NULL
+        output$featureplot2_plotly <- NULL
+        output$dotplot2 <- NULL
+        output$dotplot2_plotly <- NULL
+
+        gene_names <<- ""
         all_genes <<- as.list(c("", sort(union(genes_1, genes_2))))
         #print(all_genes[1:5])
-
         updateSelectizeInput(session, 'gene_symbol', choices = all_genes, server = F)
     })
 
-    gene_names <- reactiveValues()
+
     observeEvent(input$gene_symbol, {
         gene_names <<- input$gene_symbol
+        print(gene_names)
     })
 
-    gene_list <- reactiveValues()
+    gene_list <- ""
     observeEvent(input$gene_list_submit, {
         gene_list <<- trimws(strsplit(input$gene_list, '\n')[[1]])
-        if (length(gene_list) == 1) {
+        if (length(gene_list) == 1 && gene_list != "") {
             # simply trigger the gene_symbol box
             if (gene_list %in% all_genes) {
                 updateSelectizeInput(session, 'gene_symbol', selected = gene_list, server = F)
             }
-        } else if (length(gene_list) > 1) {
-            gene_names <<- gene_list
         }
+        print(gene_list)
     })
 
     #output$value <- renderText({ gene_names })
-    #checked_boxes <- reactive(input$checkboxes)  # need ignoreNULL=FALSE. otherwise if none selected %in% doesn't work
-    always_show_featureplot <- reactive(input$featureplot_check)
-    auto_scaling <- reactive(input$figure_scaling_check)
-    fixed_plot_size <- reactive(input$plot_width)
-    plot_size <- reactiveValues()
-    plot_width <- reactiveValues()
-    plot_type <- reactive(input$plot_type)
 
     observeEvent({
-        input$figure_scaling_check
+        input$auto_scaling_check
         input$plot_width
         input$plot_type
         session$clientData$output_clusterplot1_width
@@ -160,7 +165,7 @@ function(input, output, session) {
     }, {
         #print(session$clientData$output_clusterplot1_width)
         #print(session$clientData$output_clusterplot1_plotly_width)
-        if(auto_scaling()) {
+        if(input$auto_scaling_check) {
             plot_size <<- "auto"
             plot_width <<- function() {
                 if (input$plot_type == "ggplot2") {
@@ -180,8 +185,8 @@ function(input, output, session) {
                 }
             }
         } else {
-            plot_size <<- function() {fixed_plot_size()}
-            plot_width <<- function() {fixed_plot_size()}
+            plot_size <<- function() {input$plot_width}
+            plot_width <<- function() {input$plot_width}
         }
 
     }, ignoreNULL=FALSE)  # if using checkboxGroupInput, need this option when no choice is selected
@@ -192,14 +197,19 @@ function(input, output, session) {
     scale_factor <- function() {plot_width() / dpi/ 6.33}
 
     dotplot <- function(data, genes, scale_factor) {
+            print(scale_factor)
+            print(scale_factor * dpi)
             dotplot_width <- function() {scale_factor * dpi  * (1.33 + n_distinct(data@ident)/3)}
-            dotplot_height <- function() {scale_factor * dpi * (1 + length(unique(genes))/4)}
+            dotplot_height <- function() {scale_factor * dpi * (2.5 + length(unique(genes))/4)}
             pdf(file=NULL)
             p <- DotPlot2(data, color_scaling = "zero-one", size_scaling = "area",
-                        genes.plot = genes, plot.legend = F, cols.use = c("white", "magenta"), do.return = T,
-                        dot.min=0.01, dot.scale = 6 * scale_factor) +
-                        theme(axis.text.y = element_text(face="bold", size=15 * scale_factor),
-                              axis.text.x = element_text(size=15 * scale_factor)) + coord_flip()
+                        genes.plot = genes, legend.position = "bottom", cols.use = c("white", "magenta"), do.return = T,
+                        dot.min=0.01, dot.scale = 6 * scale_factor, axis.label.size = 15 * scale_factor,
+                        horizontal = FALSE) +
+                        theme(legend.direction='vertical',
+                              legend.text=element_text(size=12 * scale_factor),
+                              legend.title=element_text(size=16 * scale_factor),
+                              legend.key.size = unit(0.5, 'lines'))
             a <- dev.off()
             list(p = p, width = dotplot_width, height = dotplot_height)
         }
@@ -215,77 +225,95 @@ function(input, output, session) {
             p[[1]]
         }
 
-    clusterplot1 <- reactiveValues()
-    clusterplot2 <- reactiveValues()
-    featureplot1 <- reactiveValues()
-    featureplot2 <- reactiveValues()
-    dotplot1 <- reactiveValues()
-    dotplot2 <- reactiveValues()
-
-    observeEvent(input$plot_type, {
-        # on-plot spinner
+        # on-plot spinner. this spinner is not transparent. Use one loading bar instead.
         # spinner_height <- plot_width()
         # if (is.null(spinner_height)) {
         #     spinner_height <- "500px"
         # } else {
         #     spinner_height <- sprintf("%spx", as.integer(spinner_height))
         # }
-        output$clusterplot1_ui <- renderUI({
+
+    observeEvent({
+        input$plot_type
+        input$dataset_1
+    }, {
+
+        output$plot_ui_r1c1 <- renderUI({
             switch(input$plot_type,
             "plotly" = plotlyOutput("clusterplot1_plotly", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height),
             "ggplot2" = plotOutput("clusterplot1", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height)
             )
         })
 
-        output$clusterplot2_ui <- renderUI({
-            switch(input$plot_type,
-            "plotly" = plotlyOutput("clusterplot2_plotly", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height),
-            "ggplot2" = plotOutput("clusterplot2", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height)
-            )
-        })
-
-        output$featureplot1_ui <- renderUI({
+        output$plot_ui_r1c2 <- renderUI({
             switch(input$plot_type,
             "plotly" = plotlyOutput("featureplot1_plotly", height = ui_plot_height, width = ui_plot_width),
             "ggplot2" = plotOutput("featureplot1", height = ui_plot_height, width = ui_plot_width)
             )
         })
 
-        output$featureplot2_ui <- renderUI({
+        output$plot_ui_r1c3 <- renderUI({
+            shinydashboard::box(width = 12,
+                switch(input$plot_type,
+                "plotly" = plotlyOutput("dotplot1_plotly", height = ui_plot_height, width = ui_plot_width),
+                "ggplot2" = plotOutput("dotplot1", height = ui_plot_height, width = ui_plot_width)
+                ), style=sprintf("height:%spx; overflow-y:scroll;", dotplot_height) #
+            )
+        })
+    })
+
+    observeEvent({
+        input$plot_type
+        input$dataset_2
+    }, {
+
+        output$plot_ui_r2c1 <- renderUI({
+            switch(input$plot_type,
+            "plotly" = plotlyOutput("clusterplot2_plotly", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height),
+            "ggplot2" = plotOutput("clusterplot2", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height)
+            )
+        })
+
+        output$plot_ui_r2c2 <- renderUI({
             switch(input$plot_type,
             "plotly" = plotlyOutput("featureplot2_plotly", height = ui_plot_height, width = ui_plot_width),
             "ggplot2" = plotOutput("featureplot2", height = ui_plot_height, width = ui_plot_width)
             )
         })
 
-        output$dotplot1_ui <- renderUI({
-            switch(input$plot_type,
-            "plotly" = plotlyOutput("dotplot1_plotly", height = ui_plot_height, width = ui_plot_width),
-            "ggplot2" = plotOutput("dotplot1", height = ui_plot_height, width = ui_plot_width)
-            )
-        })
-        output$dotplot2_ui <- renderUI({
-            switch(input$plot_type,
-            "plotly" = plotlyOutput("dotplot2_plotly", height = ui_plot_height, width = ui_plot_width),
-            "ggplot2" = plotOutput("dotplot2", height = ui_plot_height, width = ui_plot_width)
+        output$plot_ui_r2c3 <- renderUI({
+            shinydashboard::box(width = 12,
+                switch(input$plot_type,
+                "plotly" = plotlyOutput("dotplot2_plotly", height = ui_plot_height, width = ui_plot_width),
+                "ggplot2" = plotOutput("dotplot2", height = ui_plot_height, width = ui_plot_width)
+                ), style=sprintf("height:%spx; overflow-y:scroll;", dotplot_height) #
             )
         })
     })
 
+    # observeEvent({
+    #     input$plot_type
+    #     input$dataset_1
+    #     input$dataset_2
+    # }, {
+    #     selected_datasets <- c(input$dataset_1, input$dataset_2)
+    #     n_datasets <- sum(selected_datasets %in% datasets)
+    # })
+
     observeEvent({
         input$dataset_1
-        input$dataset_2
-        input$figure_scaling_check
+        input$auto_scaling_check
         input$plot_width
         scale_factor()
     }, {
         # print(seurat_data_1)
         if (!is.null(seurat_data_1)) {
-            output$title1 <- renderUI({h4(data1$name)})
-            output$description1 <- renderUI({ sprintf("%s cells", ncells_1) })
+            #output$title1 <- renderUI({h4(data1$name)})
+            # output$description1 <- renderUI({ sprintf("%s cells", ncells_1) })
             clusterplot1 <<- list(p = DimPlot(seurat_data_1, reduction.use = data1$embedding, do.label = T, pt.size = plot_1_ptsize(),
                                                 label.size = 4, cols.use = colors_1, no.legend = T, no.axes = TRUE, do.return = TRUE,
-                                                vector.friendly = (ncells_1 > rasterize_ncells), png.arguments=png.arguments),
+                                                vector.friendly = (ncells_1 > rasterize_ncells), png.arguments=png.arguments) +
+                                                labs(title = data1$name) + theme(plot.title = element_text(hjust = 0.5, face="bold")),
                                     width = plot_width, height = plot_width)
             output$clusterplot1 <- renderPlot({
                 validate(need(input$plot_type == 'ggplot2', message=FALSE))
@@ -299,17 +327,25 @@ function(input, output, session) {
 
         } else {
             output$title1 <- NULL
-            output$description1 <- NULL
+            # output$description1 <- NULL
             output$clusterplot1 <- NULL
             output$clusterplot1_plotly <- NULL
         }
+    })
 
+    observeEvent({
+        input$dataset_2
+        input$auto_scaling_check
+        input$plot_width
+        scale_factor()
+    }, {
         if (!is.null(seurat_data_2)) {
-            output$title2 <- renderUI({h4(data2$name)})
-            output$description2 <- renderUI({ sprintf("%s cells", ncells_2) })
+            #output$title2 <- renderUI({h4(data2$name)})
+            # output$description2 <- renderUI({ sprintf("%s cells", ncells_2) })
             clusterplot2 <<- list(p = DimPlot(seurat_data_2, reduction.use = data2$embedding, do.label = T, pt.size = plot_2_ptsize(),
                                             label.size = 4, cols.use = colors_2, no.legend = T, no.axes = TRUE, do.return = TRUE,
-                                            vector.friendly = (ncells_2 > rasterize_ncells), png.arguments=png.arguments),
+                                            vector.friendly = (ncells_2 > rasterize_ncells), png.arguments=png.arguments) +
+                                            labs(title = data2$name) + theme(plot.title = element_text(hjust = 0.5, face="bold")),
                                 width = plot_width, height = plot_width)
             output$clusterplot2 <- renderPlot({
                 validate(need(input$plot_type == 'ggplot2', message=FALSE))
@@ -322,7 +358,7 @@ function(input, output, session) {
             })
         } else {
             output$title2 <- NULL
-            output$description2 <- NULL
+            # output$description2 <- NULL
             output$clusterplot2 <- NULL
             output$clusterplot2_plotly <- NULL
         }
@@ -331,10 +367,8 @@ function(input, output, session) {
 
     observeEvent({
         input$dataset_1
-        input$dataset_2
         input$gene_symbol
-        input$gene_list_submit
-        input$figure_scaling_check
+        input$auto_scaling_check
         input$plot_width
         input$plot_type
         scale_factor()
@@ -357,6 +391,19 @@ function(input, output, session) {
                 output$featureplot1 <- NULL
                 output$featureplot1_plotly <- NULL
             }
+        }
+    })
+
+
+    observeEvent({
+        input$dataset_2
+        input$gene_symbol
+        input$auto_scaling_check
+        input$plot_width
+        input$plot_type
+        scale_factor()
+    }, {
+        if (length(gene_names) == 1 && gene_names != "") {
             if (!is.null(seurat_data_2) && (gene_names %in% rownames(seurat_data_2@data))) {
                 featureplot2 <<- list(p=SingleFeaturePlot(seurat_data_2, gene_names, plot_2_ptsize(), data2$embedding),
                                     width=plot_width, height=plot_width)
@@ -373,77 +420,70 @@ function(input, output, session) {
                 output$featureplot2 <- NULL
                 output$featureplot2_plotly <- NULL
             }
-        } # else {
-        #     output$featureplot1 <- NULL
-        #     output$featureplot1_plotly <- NULL
-        #     output$featureplot2 <- NULL
-        #     output$featureplot2_plotly <- NULL
-        # } ## adding this make the plot disappear when deleting a selected gene
-    })
-
-
-    observeEvent({
-        input$featureplot_check
-        input$gene_list_submit
-    }, {
-        if (length(gene_names) > 1 && !always_show_featureplot()) {
-            shinyjs::hide('featureplot1')
-            shinyjs::hide('featureplot1_plotly')
-            shinyjs::hide('featureplot2')
-            shinyjs::hide('featureplot2_plotly')
         }
     })
 
-    observeEvent({
-        input$featureplot_check
-    }, {
-        if (length(gene_names) > 1 && always_show_featureplot()) {
-            switch(input$plot_type,
-                "ggplot2" = {
-                    shinyjs::show('featureplot1')
-                    shinyjs::show('featureplot2')
-                },
-                "plotly" = {
-                    shinyjs::show('featureplot1_plotly')
-                    shinyjs::show('featureplot2_plotly')
-                }
-            )
-        }
-    })
 
-    observeEvent({
-        input$featureplot_check
-        input$gene_symbol
-    }, {
-        if (length(gene_names) == 1 && gene_names != "") {
-            switch(input$plot_type,
-                "ggplot2" = {
-                    shinyjs::show('featureplot1')
-                    shinyjs::show('featureplot2')
-                },
-                "plotly" = {
-                    shinyjs::show('featureplot1_plotly')
-                    shinyjs::show('featureplot2_plotly')
-                }
-            )
-        }
-    })
+    # observeEvent({
+    #     input$featureplot_check
+    #     input$gene_list_submit
+    # }, {
+    #     if (length(gene_names) > 1 && !input$featureplot_check) {
+    #         shinyjs::hide('featureplot1')
+    #         shinyjs::hide('featureplot1_plotly')
+    #         shinyjs::hide('featureplot2')
+    #         shinyjs::hide('featureplot2_plotly')
+    #     }
+    # })
+    #
+    # observeEvent({
+    #     input$featureplot_check
+    # }, {
+    #     if (length(gene_names) > 1 && input$featureplot_check) {
+    #         switch(input$plot_type,
+    #             "ggplot2" = {
+    #                 shinyjs::show('featureplot1')
+    #                 shinyjs::show('featureplot2')
+    #             },
+    #             "plotly" = {
+    #                 shinyjs::show('featureplot1_plotly')
+    #                 shinyjs::show('featureplot2_plotly')
+    #             }
+    #         )
+    #     }
+    # })
+    #
+    # observeEvent({
+    #     input$featureplot_check
+    #     input$gene_symbol
+    # }, {
+    #     if (length(gene_names) == 1 && gene_names != "") {
+    #         switch(input$plot_type,
+    #             "ggplot2" = {
+    #                 shinyjs::show('featureplot1')
+    #                 shinyjs::show('featureplot2')
+    #             },
+    #             "plotly" = {
+    #                 shinyjs::show('featureplot1_plotly')
+    #                 shinyjs::show('featureplot2_plotly')
+    #             }
+    #         )
+    #     }
+    # })
 
 
     observeEvent({
         input$dataset_1
-        input$dataset_2
-        input$gene_symbol
         input$gene_list_submit
-        input$figure_scaling_check
+        input$auto_scaling_check
         input$plot_width
         input$plot_type
         scale_factor()
     }, {
 
-        if (length(gene_names) > 1 || (length(gene_names) == 1 && gene_names != "")) {
+        if (length(gene_list) > 1 || (length(gene_list) == 1 && gene_list != "")) {
             if (!is.null(seurat_data_1)) {
-                dotplot1 <<- dotplot(seurat_data_1, gene_names, scale_factor())
+                dotplot1 <<- dotplot(seurat_data_1, gene_list, scale_factor())
 
                 output$dotplot1 <- renderPlot({
                     validate(need(input$plot_type == 'ggplot2', message=FALSE))
@@ -452,12 +492,30 @@ function(input, output, session) {
 
                 output$dotplot1_plotly <- renderPlotly({
                     validate(need(input$plot_type == 'plotly', message=FALSE))
-                    ggplotly(dotplot1$p, width = dotplot1$width(), height = dotplot1$height() + 40, source = "dotplot1_plotly")
+                    ggplotly(dotplot1$p, width = dotplot1$width() + scale_factor() * dpi * 0.85,
+                            height = dotplot1$height() - scale_factor() * dpi * 1.1, source = "dotplot1_plotly")
                 })
             }
+        }
 
+        if (is.null(seurat_data_1)) {
+            output$dotplot1 <- NULL
+            output$dotplot1_plotly <- NULL
+        }
+    })
+
+    observeEvent({
+        input$dataset_2
+        input$gene_list_submit
+        input$auto_scaling_check
+        input$plot_width
+        input$plot_type
+        scale_factor()
+    }, {
+
+        if (length(gene_list) > 1 || (length(gene_list) == 1 && gene_list != "")) {
             if (!is.null(seurat_data_2)) {
-                dotplot2 <<- dotplot(seurat_data_2, gene_names, scale_factor())
+                dotplot2 <<- dotplot(seurat_data_2, gene_list, scale_factor())
 
                 output$dotplot2 <- renderPlot({
                     validate(need(input$plot_type == 'ggplot2', message=FALSE))
@@ -466,16 +524,13 @@ function(input, output, session) {
 
                 output$dotplot2_plotly <- renderPlotly({
                     validate(need(input$plot_type == 'plotly', message=FALSE))
-                    ggplotly(dotplot2$p, width = dotplot2$width(), height = dotplot2$height() + 40, source = "dotplot2_plotly")
+                    ggplotly(dotplot2$p, width = dotplot2$width() + scale_factor() * dpi * 0.85,
+                            height = dotplot2$height() - scale_factor() * dpi * 1.1, source = "dotplot2_plotly")
                 })
             }
 
         }
 
-        if (is.null(seurat_data_1)) {
-            output$dotplot1 <- NULL
-            output$dotplot1_plotly <- NULL
-        }
         if (is.null(seurat_data_2)) {
             output$dotplot2 <- NULL
             output$dotplot2_plotly <- NULL
@@ -501,7 +556,7 @@ function(input, output, session) {
         print(click_dotplot_1$y)
         print(click_dotplot_2)
         print(click_dotplot_2$y)
-        gene_selected <- rev(gene_names)[click_data$y]
+        gene_selected <- rev(gene_list)[click_data$y]
         if (gene_selected %in% all_genes) {
             updateSelectizeInput(session, 'gene_symbol', selected = gene_selected, server = F)
         }
