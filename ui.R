@@ -5,9 +5,19 @@ column_size <- 6
 ui_plot_width <- "100%"
 ui_plot_height <- "auto"
 
+window_title <- 'Shiny Single Cell Browser'
+
 shinyUI(fluidPage(
     useShinyjs(),
-    titlePanel('Shiny Single Cell Browser'),
+    titlePanel(
+        fluidRow(
+            column(4, window_title),
+            column(3, conditionalPanel(
+                        condition="($('html').hasClass('shiny-busy'))",
+                        img(height=20, src="horizontal_spinner.gif")
+            ))
+        ), windowTitle = window_title
+    ),
     sidebarLayout(
         sidebarPanel(
             selectizeInput('dataset_1', h4('Datasets'),
@@ -28,7 +38,7 @@ shinyUI(fluidPage(
             textAreaInput("gene_list", NULL, "", placeholder = "Add gene list here",
                         height = '80px'),
             fluidRow(column(12, actionButton("gene_list_submit", "Plot Gene list"), align="center")),
-            radioButtons("plot_type", "Plot type:", choices = c("Static" = "ggplot2", "Interactive" = "plotly"),
+            radioButtons("plot_type", "Visualization Mode:", choices = c("Basic" = "ggplot2", "Interactive" = "plotly"),
                             selected = "ggplot2", inline = TRUE),
             checkboxInput("featureplot_check", "Always show 2D gene plot", value = FALSE),
             checkboxInput("figure_scaling_check", "Auto scale figure size", value = TRUE),

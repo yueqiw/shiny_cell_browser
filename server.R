@@ -3,6 +3,7 @@ library(Seurat)
 library(rjson)
 library(plotly)  # dev branch
 library(ggplot2)  # dev branch
+#library(shinycssloaders)
 source("./utils.R")
 
 # -------------------------
@@ -10,28 +11,38 @@ source("./utils.R")
 # -------------------------
 # Interactive visualization of single cell RNAseq datasets
 #
+# 07-14-2018
+#
+# Add Plotly interactive mode. Click on a gene in the dot plot to show it's distribution on t-SNE/UMAP.
+# The interactive mode requires the new ggplot2 v3.0.0 and the dev branch of plotly.
+# Non-interactive mode works for both ggplot2 v2.2.1 and v3.0.0
+#
 # 07-13-2018
-# Visualize two datasets simultaneously. Can easily switch beteen more datasets from dropdown menu.
-# Visualize cluster distribution on UMAP/t-SNE plots.
+#
+# Visualize two datasets simultaneously. Can easily switch beteen more datasets from the dropdown menu.
+# Plot cluster distribution on UMAP/t-SNE plots.
 # Plot the expression pattern of individual marker genes on UMAP/t-SNE embeddings.
-# Plot cluster-averaged expression of gene lists using dot plots.
+# Plot cluster-averaged expression of marker gene lists using dot plots.
 # Automatic resizing/scaling of figures to fit different browser windows and screen resolutions.
-# Export publication-quality figures in PDF and PNG formats. (use manual scaling for consistency)
-# Specify pre-analyzed datasets in the JSON config file.
-# Currently support Seurat format.
+# Export publication-quality figures in PDF and PNG formats. (recommend using manual resizing for consistency)
+# Specify pre-analyzed datasets in the JSON config file (see example_config.json).
+# Currently support Seurat data format.
+
 
 
 # TODO:
 # Add argument parser
 # Add precomputed marker genes into Seurat data
-# Add Plotly interactive plots
+# Add Plotly interactive plots  -- done
 # Click on cluster labels and show significant marker genes
-# Click on dotplot gene and show tsne/umap
+# Click on dotplot gene and show tsne/umap  -- done
 # Calculate gene module score with gene lists and plot on tsne/umap
 # Make it into a package
 
 ui_plot_width <- "100%"
 ui_plot_height <- "auto"
+
+#options(spinner.color="#0dc5c1")
 
 calc_pt_size <- function(n) {30 / n^0.5}
 plot_inch <- 4
@@ -106,7 +117,7 @@ function(input, output, session) {
             genes_2 <- NULL
         }
 
-        all_genes <<- as.list(c("", union(genes_1, genes_2)))
+        all_genes <<- as.list(c("", sort(union(genes_1, genes_2))))
         #print(all_genes[1:5])
 
         updateSelectizeInput(session, 'gene_symbol', choices = all_genes, server = F)
@@ -131,7 +142,7 @@ function(input, output, session) {
     })
 
     #output$value <- renderText({ gene_names })
-    #checked_boxes <- reactive(input$checkboxes)  # is none selected %in% doesn't work
+    #checked_boxes <- reactive(input$checkboxes)  # need ignoreNULL=FALSE. otherwise if none selected %in% doesn't work
     always_show_featureplot <- reactive(input$featureplot_check)
     auto_scaling <- reactive(input$figure_scaling_check)
     fixed_plot_size <- reactive(input$plot_width)
@@ -211,18 +222,24 @@ function(input, output, session) {
     dotplot2 <- reactiveValues()
 
     observeEvent(input$plot_type, {
-
+        # on-plot spinner
+        # spinner_height <- plot_width()
+        # if (is.null(spinner_height)) {
+        #     spinner_height <- "500px"
+        # } else {
+        #     spinner_height <- sprintf("%spx", as.integer(spinner_height))
+        # }
         output$clusterplot1_ui <- renderUI({
             switch(input$plot_type,
-            "plotly" = plotlyOutput("clusterplot1_plotly", height = ui_plot_height, width = ui_plot_width),
-            "ggplot2" = plotOutput("clusterplot1", height = ui_plot_height, width = ui_plot_width)
+            "plotly" = plotlyOutput("clusterplot1_plotly", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height),
+            "ggplot2" = plotOutput("clusterplot1", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height)
             )
         })
 
         output$clusterplot2_ui <- renderUI({
             switch(input$plot_type,
-            "plotly" = plotlyOutput("clusterplot2_plotly", height = ui_plot_height, width = ui_plot_width),
-            "ggplot2" = plotOutput("clusterplot2", height = ui_plot_height, width = ui_plot_width)
+            "plotly" = plotlyOutput("clusterplot2_plotly", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height),
+            "ggplot2" = plotOutput("clusterplot2", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height)
             )
         })
 
@@ -355,6 +372,11 @@ function(input, output, session) {
                 output$featureplot2 <- NULL
                 output$featureplot2_plotly <- NULL
             }
+        } else {
+            output$featureplot1 <- NULL
+            output$featureplot1_plotly <- NULL
+            output$featureplot2 <- NULL
+            output$featureplot2_plotly <- NULL
         }
     })
 
