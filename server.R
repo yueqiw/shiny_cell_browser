@@ -31,6 +31,7 @@ source("./utils.R")
 
 
 # TODO:
+# add figure legend
 # Add argument parser
 # Add precomputed marker genes into Seurat data
 # Add Plotly interactive plots  -- done
@@ -372,12 +373,12 @@ function(input, output, session) {
                 output$featureplot2 <- NULL
                 output$featureplot2_plotly <- NULL
             }
-        } else {
-            output$featureplot1 <- NULL
-            output$featureplot1_plotly <- NULL
-            output$featureplot2 <- NULL
-            output$featureplot2_plotly <- NULL
-        }
+        } # else {
+        #     output$featureplot1 <- NULL
+        #     output$featureplot1_plotly <- NULL
+        #     output$featureplot2 <- NULL
+        #     output$featureplot2_plotly <- NULL
+        # } ## adding this make the plot disappear when deleting a selected gene
     })
 
 
