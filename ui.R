@@ -11,12 +11,8 @@ shinyUI(fluidPage(
     useShinyjs(),
     titlePanel(
         fluidRow(
-            column(4, window_title),
-            column(3, conditionalPanel(
-                        condition="($('html').hasClass('shiny-busy'))",
-                        img(height=20, src="horizontal_spinner.gif")
-            ))
-        ), windowTitle = window_title
+            column(6, window_title)  # we can potentially add more info here
+        ), windowTitle = window_title  # this is to display on the headers of web browser.
     ),
     sidebarLayout(
         sidebarPanel(
@@ -38,6 +34,16 @@ shinyUI(fluidPage(
             textAreaInput("gene_list", NULL, "", placeholder = "Add gene list here",
                         height = '80px'),
             fluidRow(column(12, actionButton("gene_list_submit", "Plot Gene list"), align="center")),
+
+            fluidRow(class = "loading",
+                column(12,
+                    conditionalPanel(
+                                condition="($('html').hasClass('shiny-busy'))",
+                                img(height=16, src="horizontal_spinner.gif")
+                    ), align="center", style="margin-top:8px;"
+                ), style="height:32px;"
+            ),
+
             radioButtons("plot_type", "Visualization Mode:", choices = c("Basic" = "ggplot2", "Interactive" = "plotly"),
                             selected = "ggplot2", inline = TRUE),
             checkboxInput("featureplot_check", "Always show 2D gene plot", value = FALSE),
@@ -48,7 +54,7 @@ shinyUI(fluidPage(
             #     selected = c("figure_scaling_check")),
             sliderInput("plot_width", "Manual scale figure size",
                   min = 200, max = 800, value = 500, step = 10, ticks = FALSE),
-            hr(),
+            div(),  # or hr()
             radioButtons("figure_type", h4(HTML("Download Figure:")),
                   choiceNames = c("2D Cluster Plot", "Dot Plot", "2D Gene Plot"),
                   choiceValues = c("clusterplot", "dotplot", "featureplot"), selected = "dotplot", inline = FALSE),
@@ -61,7 +67,9 @@ shinyUI(fluidPage(
             fluidRow(column(12, downloadButton('download', 'Download'), align="center")),
             verbatimTextOutput("value"),  # for debugging purpose only.
 
-            style = "position:fixed;width:inherit;",
+            # style = "position:fixed;width:inherit;",  # floating sidebar prevents reaching to the bottom when it's longer than window height.
+            # tags$head(tags$style(".loading{height:30px;}"  # two ways to add styles: 1. here, 2. use style="xxx" in each box.
+            #   )),
             width=2
         ),
         mainPanel(
