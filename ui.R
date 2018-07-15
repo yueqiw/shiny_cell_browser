@@ -1,7 +1,7 @@
 library(shiny)
 library(shinyjs)
 library(plotly)
-column_size <- 6
+
 ui_plot_width <- "100%"
 ui_plot_height <- "auto"
 
@@ -46,12 +46,12 @@ shinyUI(fluidPage(
 
             radioButtons("plot_type", "Visualization Mode:", choices = c("Basic" = "ggplot2", "Interactive" = "plotly"),
                             selected = "ggplot2", inline = TRUE),
-            checkboxInput("featureplot_check", "Always show 2D gene plot", value = FALSE),
-            checkboxInput("figure_scaling_check", "Auto scale figure size", value = TRUE),
+            #checkboxInput("featureplot_check", "Always show 2D gene plot", value = FALSE),
+            checkboxInput("auto_scaling_check", "Auto scale figure size", value = TRUE),
             # checkboxGroupInput("checkboxes", label = NULL,
             #     choices = list("Always show 2D gene plot" = "featureplot_check",
-            #                     "Auto scale figure size" = "figure_scaling_check"),
-            #     selected = c("figure_scaling_check")),
+            #                     "Auto scale figure size" = "auto_scaling_check"),
+            #     selected = c("auto_scaling_check")),
             sliderInput("plot_width", "Manual scale figure size",
                   min = 200, max = 800, value = 500, step = 10, ticks = FALSE),
             div(),  # or hr()
@@ -73,26 +73,28 @@ shinyUI(fluidPage(
             width=2
         ),
         mainPanel(
+            # fluidRow(
+            #     column(6, uiOutput("title1"), align = 'center'),
+            #     column(6, uiOutput("title2"), align = 'center')
+            # ),
+            # fluidRow(
+            #     column(6, uiOutput("description1"), align = 'center'),
+            #     column(6, uiOutput("description2"), align = 'center')
+            # ),
             fluidRow(
-                column(column_size, uiOutput("title1"), align = 'center'),
-                column(column_size, uiOutput("title2"), align = 'center')
+                column(4, uiOutput("plot_ui_r1c1"), align="center"),
+                column(4, uiOutput("plot_ui_r1c2"), align="center"),
+                column(4, uiOutput("plot_ui_r1c3"), align="center")
             ),
             fluidRow(
-                column(column_size, uiOutput("description1"), align = 'center'),
-                column(column_size, uiOutput("description2"), align = 'center')
+                column(4, uiOutput("plot_ui_r2c1"), align="center"),
+                column(4, uiOutput("plot_ui_r2c2"), align="center"),
+                column(4, uiOutput("plot_ui_r2c3"), align="center")
             ),
             fluidRow(
-                column(column_size, uiOutput("clusterplot1_ui"), align="center"),
-                column(column_size, uiOutput("clusterplot2_ui"), align="center")
-            ),
-            fluidRow(
-                column(column_size, uiOutput("featureplot1_ui"), align="center"),
-                column(column_size, uiOutput("featureplot2_ui"), align="center")
-            ),
-            fluidRow(
-                column(column_size, uiOutput("dotplot1_ui"), align="center"),
-                column(column_size, uiOutput("dotplot2_ui"), align="center")
-            ), width = 9
+                column(4, uiOutput("plot_ui_r3c1"), align="center"),
+                column(4, uiOutput("plot_ui_r3c2"), align="center")
+            ), width = 10
         ), position = c('left')
     )
 )
