@@ -31,7 +31,7 @@ source("./utils.R")
 
 
 # TODO:
-# add figure legend
+# add figure legend -- done.
 # Add argument parser
 # Add precomputed marker genes into Seurat data
 # Add Plotly interactive plots  -- done
@@ -53,26 +53,37 @@ fixed_plot_size <- dpi * plot_inch
 png.arguments <- c(4,4,300)
 rasterize_ncells <- 150000  # usually use ~2000. But now vector.friendly does not work for ggplot 3.0, so I disabled this.
 
-json_data <- fromJSON(file = './config.json')
-json_data <- json_data$data
+json_file <- fromJSON(file = './config.json')
+json_data <- json_file$data
 datasets <- 1:length(json_data)
 dataset_names <- sapply(json_data, function(x) x$name)
-dataset_selector <- as.list(c(datasets, "no_data"))
+dataset_selector <- as.list(c(datasets, "none"))
 names(dataset_selector) <- c(dataset_names, "None")
 
-print(dataset_selector)
+config <- json_file$config
 
-dotplot_height <- 500
+startup_datasets <- list(config$startup_data1, config$startup_data2, config$startup_data3)
+startup_datasets[sapply(startup_datasets, is.null)] <- "none"
+
+if (!all(startup_datasets %in% c(datasets, "none"))) {
+    warning(sprintf("`startup_data1/2/3` needs to be one of %s", paste(dataset_selector, collapse = ", ")))
+    startup_datasets[!startup_datasets %in% dataset_selector] <- "none"
+}
+
+# print(dataset_selector)
+
+dotplot_height <- 500  # height in vertical layout (can expand to make it longer. )
 
 function(input, output, session) {
 
     #print(dataset_selector)
 
-    updateSelectizeInput(session, 'dataset_1', choices = dataset_selector, selected = dataset_selector[[1]], server = F)
-    updateSelectizeInput(session, 'dataset_2', choices = dataset_selector, selected = dataset_selector[[2]], server = F)
-    updateSelectizeInput(session, 'dataset_3', choices = dataset_selector, selected = dataset_selector[[3]], server = F)
+    updateSelectizeInput(session, 'dataset_1', choices = dataset_selector, selected = startup_datasets[[1]], server = F)
+    updateSelectizeInput(session, 'dataset_2', choices = dataset_selector, selected = startup_datasets[[2]], server = F)
+    updateSelectizeInput(session, 'dataset_3', choices = dataset_selector, selected = startup_datasets[[3]], server = F)
 
-
+    # -----------------------
+    # Main UI
     output$main_panel <- renderUI({
         if (input$layout_type == 'horizontal') {
             list(
@@ -244,10 +255,13 @@ function(input, output, session) {
     })
 
 
-    # No need to use reactiveValues.
-    # Note that values taken from the reactiveValues object are reactive, but the reactiveValues object itself is not
+
+    # -----------------------------
+    # Load datasets.
 
     # gene_data <- reactiveValues()
+    # No need to use reactiveValues here.
+    # Note that values taken from the reactiveValues object are reactive, but the reactiveValues object itself is not
 
     observeEvent({
         input$dataset_1
@@ -335,16 +349,17 @@ function(input, output, session) {
         gene_names <<- ""
         all_genes <<- as.list(c("", sort(unique(c(genes_1, genes_2, genes_3)))))
         #print(all_genes[1:5])
-        print(genes_2[1:5])
-        print(genes_3[1:5])
-        print(all_genes[1:5])
         print(length(all_genes))
         updateSelectizeInput(session, 'gene_symbol', choices = all_genes, server = F)
     })
 
+
+    # ---------------------------
+    # update gene selections.
+
     observeEvent(input$gene_symbol, {
         gene_names <<- input$gene_symbol
-        print(gene_names)
+        #print(gene_names)
     })
 
     gene_list <- ""
@@ -356,14 +371,13 @@ function(input, output, session) {
                 updateSelectizeInput(session, 'gene_symbol', selected = gene_list, server = F)
             }
         }
-        print(gene_list)
+        #print(gene_list)
     })
 
-    #output$value <- renderText({ gene_names })
+    # ----------------------------
+    # Manual-scaling figure size
 
-    #plot_width <- reactiveVal()
-
-    observeEvent({
+    observeEvent({  # this may be redundant
         input$auto_scaling_check
         input$plot_width
     }, {
@@ -373,14 +387,15 @@ function(input, output, session) {
     })
 
 
+    # ----------------------------
+    # Auto-scaling figure size (check all figures)
+
     all_ggplots <- c("clusterplot1", "clusterplot2", "clusterplot3",
                     "featureplot1", "featureplot2", "featureplot3",
                     "dotplot1", "dotplot2", "dotplot3")
-    # all_plotly_plots <- sprintf("%s_plotly", all_ggplots)
-
 
     for (plot_name in c(all_ggplots)) {
-        print(plot_name)
+        #print(plot_name)
         observe({
             if (input$auto_scaling_check) {
                 plot_width <<- function() {
@@ -404,11 +419,10 @@ function(input, output, session) {
         })
     }
 
-
+    # older implementation only checking the size of the first plot
     # observeEvent({
     #     input$auto_scaling_check
     #     input$plot_width
-    #
     # }, {
     #     if(input$auto_scaling_check) {
     #         plot_width <<- function() {
@@ -420,8 +434,12 @@ function(input, output, session) {
     #     #print(plot_width())
     # })
 
-
+    # ----------------------
+    # calculate scale factor
     scale_factor <- function() {plot_width() / dpi / plot_inch}
+
+    # ----------------------
+    # Functions for plotting
 
     ClusterPlotScaled <- function(data, embedding, title_use, colors_use, n_cells, raw_ptsize, scale_factor) {
         scaled_ptsize <- function() {scale_factor ^ 2 * raw_ptsize}
@@ -448,7 +466,7 @@ function(input, output, session) {
 
     DotPlotScaled <- function(data, genes, scale_factor) {
             print(scale_factor)
-            print(scale_factor * dpi)
+            #print(scale_factor * dpi)
             scaled_width <- function() {scale_factor * dpi * 0.633 * (1.8 + n_distinct(data@ident)/3.5)}
             scaled_height <- function() {scale_factor * dpi * 0.633 * (1.2 + length(unique(genes))/4) + 120}
             scaled_ptsize <- function() {scale_factor ^ 2 * 3.8}
@@ -465,6 +483,9 @@ function(input, output, session) {
             list(p = p, width = scaled_width, height = scaled_height)
         }
 
+
+    # ---------------------------
+    #  Cluster Plots
 
     observeEvent({
         input$dataset_1
@@ -577,6 +598,8 @@ function(input, output, session) {
         }
     })
 
+    # ---------------------------
+    #  Gene Plots
 
     observeEvent({
         input$dataset_1
@@ -682,6 +705,10 @@ function(input, output, session) {
         }
     })
 
+
+    # ------------------------
+    # Switch from cluster plots to gene plots when a gene is selected
+
     observeEvent({
         input$gene_symbol
     }, {
@@ -693,6 +720,9 @@ function(input, output, session) {
             }
         }
     })
+
+    # ------------------------
+    # Dot Plots
 
     observeEvent({
         input$dataset_1
@@ -793,7 +823,8 @@ function(input, output, session) {
         }
     })
 
-    # Click on dot plot and show the t-SNE/UMAP of that gene
+    # ----------------------------
+    # Click on dot plot and show the gene on t-SNE/UMAP
     observe({
         # Get subset based on selection
         click_dotplot_1 <- event_data("plotly_click", source = "dotplot1_plotly")
@@ -807,15 +838,16 @@ function(input, output, session) {
         if (!is.null(click_dotplot_3)) click_data <- click_dotplot_3
 
         if (is.null(click_data)) return(NULL)
-        print(click_dotplot_1)
-        print(click_dotplot_2)
-        print(click_dotplot_3)
+        print(click_data)
+        #print(click_dotplot_2)
         gene_selected <- rev(unique(gene_list))[click_data$y]  # need to be unique
         if (gene_selected %in% all_genes) {
             updateSelectizeInput(session, 'gene_symbol', selected = gene_selected, server = F)
         }
     })
 
+    # ----------------------------
+    # Download figures
 
     output$download <- downloadHandler(
         # This function returns a string which tells the client

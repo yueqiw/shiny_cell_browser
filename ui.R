@@ -84,21 +84,24 @@ shinyUI(fluidPage(
             width=2
         ),
         mainPanel(
-            tags$head(tags$script('
-                        var dimension = [0, 0];
-                        $(document).on("shiny:connected", function(e) {
-                        dimension[0] = window.innerWidth;
-                        dimension[1] = window.innerHeight;
-                        Shiny.onInputChange("dimension", dimension);
-                        });
-                        $(window).resize(function(e) {
-                        dimension[0] = window.innerWidth;
-                        dimension[1] = window.innerHeight;
-                        Shiny.onInputChange("dimension", dimension);
-                        });
-                        ')),
+            # use input$dimension to monitor window size. (somehow it doesn't go straight from a -> b, but multiple steps.)
+            # tags$head(tags$script('
+            #             var dimension = [0, 0];
+            #             $(document).on("shiny:connected", function(e) {
+            #             dimension[0] = window.innerWidth;
+            #             dimension[1] = window.innerHeight;
+            #             Shiny.onInputChange("dimension", dimension);
+            #             });
+            #             $(window).resize(function(e) {
+            #             dimension[0] = window.innerWidth;
+            #             dimension[1] = window.innerHeight;
+            #             Shiny.onInputChange("dimension", dimension);
+            #             });
+            #             ')),
 
             uiOutput("main_panel")
+
+            # Now we render the main panel in server.R depending on vertical vs. horizontal layout selection.
             # fluidRow(
             #     column(6, uiOutput("title1"), align = 'center'),
             #     column(6, uiOutput("title2"), align = 'center')

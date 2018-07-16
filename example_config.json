@@ -24,6 +24,11 @@
             "clusters": "res.0.8",
             "embedding": "tsne"
         }
-    ]
+    ],
+    "config": {
+        "startup_data1": 1,
+        "startup_data2": "none",
+        "startup_data3": "none"
+    }
 
 }
