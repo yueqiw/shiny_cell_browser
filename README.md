@@ -3,6 +3,11 @@
 
 Interactive visualization of single cell RNAseq datasets
 
+07-15-2018
+  - Visualize up to 3 datasets simultaneously and interactively in the same window. 
+  - Both horizontal and vertical layouts are available. 
+  - Improved update latency. 
+
 07-14-2018
 
   - Add Plotly interactive mode. Click on a gene in the dot plot to show it's distribution on t-SNE/UMAP.
@@ -56,7 +61,12 @@ Example `config.json` file:
             "clusters": "res.1",
             "embedding": "tsne_1"
         }
-    ]
+    ],
+    "config": {
+        "startup_data1": 1,
+        "startup_data2": "none",
+        "startup_data3": "none"
+    }
 }
 ```
 
