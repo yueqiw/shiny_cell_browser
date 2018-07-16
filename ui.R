@@ -46,6 +46,8 @@ shinyUI(fluidPage(
 
             radioButtons("plot_type", "Visualization Mode:", choices = c("Basic" = "ggplot2", "Interactive" = "plotly"),
                             selected = "ggplot2", inline = TRUE),
+            radioButtons("layout_type", "Layout:", choices = c("Vertical" = "vertical", "Horizontal" = "horizontal"),
+                            selected = "vertical", inline = TRUE),
             #checkboxInput("featureplot_check", "Always show 2D gene plot", value = FALSE),
             checkboxInput("auto_scaling_check", "Auto scale figure size", value = TRUE),
             # checkboxGroupInput("checkboxes", label = NULL,
@@ -81,20 +83,23 @@ shinyUI(fluidPage(
             #     column(6, uiOutput("description1"), align = 'center'),
             #     column(6, uiOutput("description2"), align = 'center')
             # ),
-            fluidRow(
-                column(4, uiOutput("plot_ui_r1c1"), align="center"),
-                column(4, uiOutput("plot_ui_r1c2"), align="center"),
-                column(4, uiOutput("plot_ui_r1c3"), align="center")
-            ),
-            fluidRow(
-                column(4, uiOutput("plot_ui_r2c1"), align="center"),
-                column(4, uiOutput("plot_ui_r2c2"), align="center"),
-                column(4, uiOutput("plot_ui_r2c3"), align="center")
-            ),
-            fluidRow(
-                column(4, uiOutput("plot_ui_r3c1"), align="center"),
-                column(4, uiOutput("plot_ui_r3c2"), align="center")
-            ), width = 10
+            uiOutput("main_panel")
+            # fluidRow(
+            #     column(4, uiOutput("plot_ui_r1c1"), align="center"),
+            #     column(4, uiOutput("plot_ui_r1c2"), align="center"),
+            #     column(4, uiOutput("plot_ui_r1c3"), align="center")
+            # ),
+            # fluidRow(
+            #     column(4, uiOutput("plot_ui_r2c1"), align="center"),
+            #     column(4, uiOutput("plot_ui_r2c2"), align="center"),
+            #     column(4, uiOutput("plot_ui_r2c3"), align="center")
+            # ),
+            # fluidRow(
+            #     column(4, uiOutput("plot_ui_r3c1"), align="center"),
+            #     column(4, uiOutput("plot_ui_r3c2"), align="center"),
+            #     column(4, uiOutput("plot_ui_r3c3"), align="center")
+            # )
+            , width = 10
         ), position = c('left')
     )
 )

@@ -63,6 +63,7 @@ print(dataset_selector)
 dotplot_height <- 500
 
 function(input, output, session) {
+
     #print(dataset_selector)
 
     updateSelectizeInput(session, 'dataset_1', choices = dataset_selector, selected = dataset_selector[[1]], server = F)
@@ -156,6 +157,12 @@ function(input, output, session) {
 
     #output$value <- renderText({ gene_names })
 
+
+
+
+
+
+
     observeEvent({
         input$auto_scaling_check
         input$plot_width
@@ -233,62 +240,110 @@ function(input, output, session) {
         #     spinner_height <- sprintf("%spx", as.integer(spinner_height))
         # }
 
-    observeEvent({
-        input$plot_type
-        input$dataset_1
-    }, {
-
-        output$plot_ui_r1c1 <- renderUI({
-            switch(input$plot_type,
-            "plotly" = plotlyOutput("clusterplot1_plotly", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height),
-            "ggplot2" = plotOutput("clusterplot1", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height)
+    output$main_panel <- renderUI({
+        if (input$layout_type == 'horizontal') {
+            list(
+                fluidRow(
+                    column(4,
+                        switch(input$plot_type,
+                            "plotly" = plotlyOutput("clusterplot1_plotly", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height),
+                            "ggplot2" = plotOutput("clusterplot1", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height)
+                        ), align="center"
+                    ),
+                    column(4,
+                        switch(input$plot_type,
+                            "plotly" = plotlyOutput("featureplot1_plotly", height = ui_plot_height, width = ui_plot_width),
+                            "ggplot2" = plotOutput("featureplot1", height = ui_plot_height, width = ui_plot_width)
+                        ), align="center"
+                    ),
+                    column(4,
+                        shinydashboard::box(width = 12,
+                            switch(input$plot_type,
+                                "plotly" = plotlyOutput("dotplot1_plotly", height = ui_plot_height, width = ui_plot_width),
+                                "ggplot2" = plotOutput("dotplot1", height = ui_plot_height, width = ui_plot_width)
+                            ), style=sprintf("height:%spx; overflow-y:scroll;", dotplot_height) #
+                        ), align="center"
+                    )
+                ),
+                fluidRow(
+                    column(4,
+                        switch(input$plot_type,
+                            "plotly" = plotlyOutput("clusterplot2_plotly", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height),
+                            "ggplot2" = plotOutput("clusterplot2", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height)
+                        ), align="center"
+                    ),
+                    column(4,
+                        switch(input$plot_type,
+                            "plotly" = plotlyOutput("featureplot2_plotly", height = ui_plot_height, width = ui_plot_width),
+                            "ggplot2" = plotOutput("featureplot2", height = ui_plot_height, width = ui_plot_width)
+                        ), align="center"
+                    ),
+                    column(4,
+                        shinydashboard::box(width = 12,
+                            switch(input$plot_type,
+                                "plotly" = plotlyOutput("dotplot2_plotly", height = ui_plot_height, width = ui_plot_width),
+                                "ggplot2" = plotOutput("dotplot2", height = ui_plot_height, width = ui_plot_width)
+                            ), style=sprintf("height:%spx; overflow-y:scroll;", dotplot_height) #
+                        ), align="center"
+                    )
+                )
             )
-        })
-
-        output$plot_ui_r1c2 <- renderUI({
-            switch(input$plot_type,
-            "plotly" = plotlyOutput("featureplot1_plotly", height = ui_plot_height, width = ui_plot_width),
-            "ggplot2" = plotOutput("featureplot1", height = ui_plot_height, width = ui_plot_width)
+        } else if (input$layout_type == 'vertical') {
+            list (
+                fluidRow(
+                    column(4,
+                        tabsetPanel(id = "tabset_r1c1", selected = "Clusters",
+                            tabPanel("Clusters",
+                                switch(input$plot_type,
+                                    "plotly" = plotlyOutput("clusterplot1_plotly", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height),
+                                    "ggplot2" = plotOutput("clusterplot1", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height)
+                                )
+                            ),
+                            tabPanel("Gene Expression",
+                                switch(input$plot_type,
+                                "plotly" = plotlyOutput("featureplot1_plotly", height = ui_plot_height, width = ui_plot_width),
+                                "ggplot2" = plotOutput("featureplot1", height = ui_plot_height, width = ui_plot_width)
+                                )
+                            )
+                        ), align="center"
+                    ),
+                    column(4,
+                        tabsetPanel(id = "tabset_r1c2", selected = "Clusters",
+                            tabPanel("Clusters",
+                                switch(input$plot_type,
+                                    "plotly" = plotlyOutput("clusterplot2_plotly", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height),
+                                    "ggplot2" = plotOutput("clusterplot2", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height)
+                                )
+                            ),
+                            tabPanel("Gene Expression",
+                                switch(input$plot_type,
+                                    "plotly" = plotlyOutput("featureplot2_plotly", height = ui_plot_height, width = ui_plot_width),
+                                    "ggplot2" = plotOutput("featureplot2", height = ui_plot_height, width = ui_plot_width)
+                                )
+                            )
+                        ), align="center"
+                    )
+                ),
+                fluidRow(
+                    column(4,
+                        shinydashboard::box(width = 12,
+                            switch(input$plot_type,
+                                "plotly" = plotlyOutput("dotplot1_plotly", height = ui_plot_height, width = ui_plot_width),
+                                "ggplot2" = plotOutput("dotplot1", height = ui_plot_height, width = ui_plot_width)
+                            ), style=sprintf("height:%spx; overflow-y:scroll;", dotplot_height) #
+                        ), align="center"
+                    ),
+                    column(4,
+                        shinydashboard::box(width = 12,
+                            switch(input$plot_type,
+                                "plotly" = plotlyOutput("dotplot2_plotly", height = ui_plot_height, width = ui_plot_width),
+                                "ggplot2" = plotOutput("dotplot2", height = ui_plot_height, width = ui_plot_width)
+                            ), style=sprintf("height:%spx; overflow-y:scroll;", dotplot_height) #
+                        ), align="center"
+                    )
+                )
             )
-        })
-
-        output$plot_ui_r1c3 <- renderUI({
-            shinydashboard::box(width = 12,
-                switch(input$plot_type,
-                "plotly" = plotlyOutput("dotplot1_plotly", height = ui_plot_height, width = ui_plot_width),
-                "ggplot2" = plotOutput("dotplot1", height = ui_plot_height, width = ui_plot_width)
-                ), style=sprintf("height:%spx; overflow-y:scroll;", dotplot_height) #
-            )
-        })
-    })
-
-    observeEvent({
-        input$plot_type
-        input$dataset_2
-    }, {
-
-        output$plot_ui_r2c1 <- renderUI({
-            switch(input$plot_type,
-            "plotly" = plotlyOutput("clusterplot2_plotly", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height),
-            "ggplot2" = plotOutput("clusterplot2", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height)
-            )
-        })
-
-        output$plot_ui_r2c2 <- renderUI({
-            switch(input$plot_type,
-            "plotly" = plotlyOutput("featureplot2_plotly", height = ui_plot_height, width = ui_plot_width),
-            "ggplot2" = plotOutput("featureplot2", height = ui_plot_height, width = ui_plot_width)
-            )
-        })
-
-        output$plot_ui_r2c3 <- renderUI({
-            shinydashboard::box(width = 12,
-                switch(input$plot_type,
-                "plotly" = plotlyOutput("dotplot2_plotly", height = ui_plot_height, width = ui_plot_width),
-                "ggplot2" = plotOutput("dotplot2", height = ui_plot_height, width = ui_plot_width)
-                ), style=sprintf("height:%spx; overflow-y:scroll;", dotplot_height) #
-            )
-        })
+        }
     })
 
     # observeEvent({
@@ -423,6 +478,16 @@ function(input, output, session) {
         }
     })
 
+    observeEvent({
+        input$gene_symbol
+    }, {
+        if (length(gene_names) == 1 && gene_names != "") {
+            if (input$layout_type == 'vertical') {
+                updateTabsetPanel(session, "tabset_r1c1", selected = "Gene Expression")
+                updateTabsetPanel(session, "tabset_r1c2", selected = "Gene Expression")
+            }
+        }
+    })
 
     # observeEvent({
     #     input$featureplot_check
