@@ -26,6 +26,11 @@ shinyUI(fluidPage(
                         choices = NULL,
                         options = list(placeholder = 'Select a dataset')
                     ),
+            selectizeInput('dataset_3', NULL,
+                        selected = NULL,
+                        choices = NULL,
+                        options = list(placeholder = 'Select a dataset')
+                    ),
             selectizeInput('gene_symbol', h4('Gene (Ensembl)'),
                         selected = "",
                         choices = "",
@@ -48,7 +53,7 @@ shinyUI(fluidPage(
                             selected = "ggplot2", inline = TRUE),
             radioButtons("layout_type", "Layout:", choices = c("Vertical" = "vertical", "Horizontal" = "horizontal"),
                             selected = "vertical", inline = TRUE),
-            #checkboxInput("featureplot_check", "Always show 2D gene plot", value = FALSE),
+
             checkboxInput("auto_scaling_check", "Auto scale figure size", value = TRUE),
             # checkboxGroupInput("checkboxes", label = NULL,
             #     choices = list("Always show 2D gene plot" = "featureplot_check",
@@ -56,15 +61,19 @@ shinyUI(fluidPage(
             #     selected = c("auto_scaling_check")),
             sliderInput("plot_width", "Manual scale figure size",
                   min = 200, max = 800, value = 500, step = 10, ticks = FALSE),
-            div(),  # or hr()
-            radioButtons("figure_type", h4(HTML("Download Figure:")),
-                  choiceNames = c("2D Cluster Plot", "Dot Plot", "2D Gene Plot"),
-                  choiceValues = c("clusterplot", "dotplot", "featureplot"), selected = "dotplot", inline = FALSE),
+            hr(),
+            #div(),
+            div(h4(HTML("Download Figure:"))),
             fluidRow(
-                column(5, radioButtons("dataset", "Dataset:",
-                      choices = c(1, 2), selected = 1, inline = FALSE)),
-                column(7, radioButtons("filetype", "File Type:",
-                       choices = c("pdf", "png"), selected = "pdf", inline = FALSE))
+                column(8, radioButtons("figure_type", NULL,
+                    choiceNames = c("Clustering", "Gene Expression", "Dot Plot"),
+                    choiceValues = c("clusterplot", "featureplot", "dotplot"),
+                    selected = "featureplot", inline = FALSE)),
+                column(4, radioButtons("filetype", NULL,
+                    choices = c("pdf", "png"), selected = "pdf", inline = FALSE))
+            ),
+            fluidRow(
+                column(12, radioButtons("dataset", "Dataset:", choices = c(1, 2, 3), selected = 1, inline = TRUE))
             ),
             fluidRow(column(12, downloadButton('download', 'Download'), align="center")),
             verbatimTextOutput("value"),  # for debugging purpose only.
@@ -75,15 +84,25 @@ shinyUI(fluidPage(
             width=2
         ),
         mainPanel(
+            tags$head(tags$script('
+                        var dimension = [0, 0];
+                        $(document).on("shiny:connected", function(e) {
+                        dimension[0] = window.innerWidth;
+                        dimension[1] = window.innerHeight;
+                        Shiny.onInputChange("dimension", dimension);
+                        });
+                        $(window).resize(function(e) {
+                        dimension[0] = window.innerWidth;
+                        dimension[1] = window.innerHeight;
+                        Shiny.onInputChange("dimension", dimension);
+                        });
+                        ')),
+
+            uiOutput("main_panel")
             # fluidRow(
             #     column(6, uiOutput("title1"), align = 'center'),
             #     column(6, uiOutput("title2"), align = 'center')
             # ),
-            # fluidRow(
-            #     column(6, uiOutput("description1"), align = 'center'),
-            #     column(6, uiOutput("description2"), align = 'center')
-            # ),
-            uiOutput("main_panel")
             # fluidRow(
             #     column(4, uiOutput("plot_ui_r1c1"), align="center"),
             #     column(4, uiOutput("plot_ui_r1c2"), align="center"),
