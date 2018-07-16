@@ -22,7 +22,7 @@ source("./utils.R")
 # Visualize two datasets simultaneously. Can easily switch beteen more datasets from the dropdown menu.
 # Plot cluster distribution on UMAP/t-SNE plots.
 # Plot the expression pattern of individual marker genes on UMAP/t-SNE embeddings.
-# Plot cluster-averaged expression of marker gene lists using dot plots.
+# Plot cluster-averaged expression of mfarker gene lists using dot plots.
 # Automatic resizing/scaling of figures to fit different browser windows and screen resolutions.
 # Export publication-quality figures in PDF and PNG formats. (recommend using manual resizing for consistency)
 # Specify pre-analyzed datasets in the JSON config file (see example_config.json).
@@ -49,6 +49,7 @@ calc_pt_size <- function(n) {30 / n^0.5}
 plot_inch <- 4
 dpi <- 125  # for web display. The saved plots have higher dpi
 fixed_plot_size <- dpi * plot_inch
+dotplot_height <- 500  # height in vertical layout (can expand to make it longer. )
 
 png.arguments <- c(4,4,300)
 rasterize_ncells <- 150000  # usually use ~2000. But now vector.friendly does not work for ggplot 3.0, so I disabled this.
@@ -72,7 +73,6 @@ if (!all(startup_datasets %in% c(datasets, "none"))) {
 
 # print(dataset_selector)
 
-dotplot_height <- 500  # height in vertical layout (can expand to make it longer. )
 
 function(input, output, session) {
 
@@ -351,6 +351,13 @@ function(input, output, session) {
         #print(all_genes[1:5])
         print(length(all_genes))
         updateSelectizeInput(session, 'gene_symbol', choices = all_genes, server = F)
+
+        if (input$layout_type == 'vertical') {
+            updateTabsetPanel(session, "tabset_r1c1", selected = "Clusters")
+            updateTabsetPanel(session, "tabset_r1c2", selected = "Clusters")
+            updateTabsetPanel(session, "tabset_r1c3", selected = "Clusters")
+        }
+
     })
 
 
