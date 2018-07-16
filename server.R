@@ -48,6 +48,8 @@ ui_plot_height <- "auto"
 calc_pt_size <- function(n) {30 / n^0.5}
 plot_inch <- 4
 dpi <- 125  # for web display. The saved plots have higher dpi
+fixed_plot_size <- dpi * plot_inch
+
 png.arguments <- c(4,4,300)
 rasterize_ncells <- 150000  # usually use ~2000. But now vector.friendly does not work for ggplot 3.0, so I disabled this.
 
@@ -59,7 +61,7 @@ dataset_selector <- as.list(c(datasets, "no_data"))
 names(dataset_selector) <- c(dataset_names, "None")
 
 print(dataset_selector)
-# fixed_plot_size <- 500
+
 dotplot_height <- 500
 
 function(input, output, session) {
@@ -68,6 +70,128 @@ function(input, output, session) {
 
     updateSelectizeInput(session, 'dataset_1', choices = dataset_selector, selected = dataset_selector[[1]], server = F)
     updateSelectizeInput(session, 'dataset_2', choices = dataset_selector, selected = dataset_selector[[2]], server = F)
+
+
+    output$main_panel <- renderUI({
+        if (input$layout_type == 'horizontal') {
+            #dotplot_height <-
+
+            list(
+                fluidRow(
+                    column(4,
+                        switch(input$plot_type,
+                            "plotly" = plotlyOutput("clusterplot1_plotly", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height),
+                            "ggplot2" = plotOutput("clusterplot1", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height)
+                        ), align="center"
+                    ),
+                    column(4,
+                        switch(input$plot_type,
+                            "plotly" = plotlyOutput("featureplot1_plotly", height = ui_plot_height, width = ui_plot_width),
+                            "ggplot2" = plotOutput("featureplot1", height = ui_plot_height, width = ui_plot_width)
+                        ), align="center"
+                    ),
+                    column(4,
+                        shinydashboard::box(width = 12,
+                            switch(input$plot_type,
+                                "plotly" = plotlyOutput("dotplot1_plotly", height = ui_plot_height, width = ui_plot_width),
+                                "ggplot2" = plotOutput("dotplot1", height = ui_plot_height, width = ui_plot_width)
+                            ), style = sprintf("height:%spx; overflow-y:scroll;",
+                                            if (!is.null(session$clientData$output_dotplot1_width)) {
+                                                session$clientData$output_dotplot1_width
+                                            } else {
+                                                session$clientData$output_dotplot1_plotly_width
+                                            }
+                                        )
+                        ), align="center"
+                    )
+                ),
+                fluidRow(
+                    column(4,
+                        switch(input$plot_type,
+                            "plotly" = plotlyOutput("clusterplot2_plotly", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height),
+                            "ggplot2" = plotOutput("clusterplot2", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height)
+                        ), align="center"
+                    ),
+                    column(4,
+                        switch(input$plot_type,
+                            "plotly" = plotlyOutput("featureplot2_plotly", height = ui_plot_height, width = ui_plot_width),
+                            "ggplot2" = plotOutput("featureplot2", height = ui_plot_height, width = ui_plot_width)
+                        ), align="center"
+                    ),
+                    column(4,
+                        shinydashboard::box(width = 12,
+                            switch(input$plot_type,
+                                "plotly" = plotlyOutput("dotplot2_plotly", height = ui_plot_height, width = ui_plot_width),
+                                "ggplot2" = plotOutput("dotplot2", height = ui_plot_height, width = ui_plot_width)
+                            ), style = sprintf("height:%spx; overflow-y:scroll;",
+                                            if (!is.null(session$clientData$output_dotplot2_width)) {
+                                                session$clientData$output_dotplot2_width
+                                            } else {
+                                                session$clientData$output_dotplot2_plotly_width
+                                            }
+                                       ) #
+                        ), align="center"
+                    )
+                )
+            )
+        } else if (input$layout_type == 'vertical') {
+            list (
+                fluidRow(
+                    column(4,
+                        tabsetPanel(id = "tabset_r1c1", selected = "Clusters",
+                            tabPanel("Clusters",
+                                switch(input$plot_type,
+                                    "plotly" = plotlyOutput("clusterplot1_plotly", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height),
+                                    "ggplot2" = plotOutput("clusterplot1", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height)
+                                )
+                            ),
+                            tabPanel("Gene Expression",
+                                switch(input$plot_type,
+                                "plotly" = plotlyOutput("featureplot1_plotly", height = ui_plot_height, width = ui_plot_width),
+                                "ggplot2" = plotOutput("featureplot1", height = ui_plot_height, width = ui_plot_width)
+                                )
+                            )
+                        ), align="center"
+                    ),
+                    column(4,
+                        tabsetPanel(id = "tabset_r1c2", selected = "Clusters",
+                            tabPanel("Clusters",
+                                switch(input$plot_type,
+                                    "plotly" = plotlyOutput("clusterplot2_plotly", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height),
+                                    "ggplot2" = plotOutput("clusterplot2", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height)
+                                )
+                            ),
+                            tabPanel("Gene Expression",
+                                switch(input$plot_type,
+                                    "plotly" = plotlyOutput("featureplot2_plotly", height = ui_plot_height, width = ui_plot_width),
+                                    "ggplot2" = plotOutput("featureplot2", height = ui_plot_height, width = ui_plot_width)
+                                )
+                            )
+                        ), align="center"
+                    )
+                ),
+                fluidRow(
+                    column(4,
+                        shinydashboard::box(width = 12,
+                            switch(input$plot_type,
+                                "plotly" = plotlyOutput("dotplot1_plotly", height = ui_plot_height, width = ui_plot_width),
+                                "ggplot2" = plotOutput("dotplot1", height = ui_plot_height, width = ui_plot_width)
+                            ), style=sprintf("height:%spx; overflow-y:scroll;", dotplot_height)#sprintf("height:100%; overflow-y:scroll;", dotplot_height) #
+                        ), align="center"
+                    ),
+                    column(4,
+                        shinydashboard::box(width = 12,
+                            switch(input$plot_type,
+                                "plotly" = plotlyOutput("dotplot2_plotly", height = ui_plot_height, width = ui_plot_width),
+                                "ggplot2" = plotOutput("dotplot2", height = ui_plot_height, width = ui_plot_width)
+                            ), style=sprintf("height:%spx; overflow-y:scroll;", dotplot_height) #
+                        ), align="center"
+                    )
+                )
+            )
+        }
+    })
+
 
     # No need to use reactiveValues right now.
     # Note that values taken from the reactiveValues object are reactive, but the reactiveValues object itself is not
@@ -157,12 +281,6 @@ function(input, output, session) {
 
     #output$value <- renderText({ gene_names })
 
-
-
-
-
-
-
     observeEvent({
         input$auto_scaling_check
         input$plot_width
@@ -198,162 +316,51 @@ function(input, output, session) {
 
     }, ignoreNULL=FALSE)  # if using checkboxGroupInput, need this option when no choice is selected
 
-    plot_1_ptsize <- function() {(plot_width() / dpi / plot_inch)^2 * pt_size_1}
-    plot_2_ptsize <- function() {(plot_width() / dpi / plot_inch)^2 * pt_size_2}
 
-    scale_factor <- function() {plot_width() / dpi/ 6.33}
+    scale_factor <- function() {plot_width() / dpi / plot_inch}
 
-    dotplot <- function(data, genes, scale_factor) {
+    ClusterPlotScaled <- function(data, embedding, title_use, colors_use, n_cells, raw_ptsize, scale_factor) {
+        scaled_ptsize <- function() {scale_factor ^ 2 * raw_ptsize}
+        p <- DimPlot(data, reduction.use = embedding, do.label = T, pt.size = scaled_ptsize(),
+                label.size = 4 * scale_factor, cols.use = colors_use, no.legend = T, no.axes = TRUE, do.return = TRUE,
+                vector.friendly = (n_cells > rasterize_ncells), png.arguments=png.arguments)
+        p <- p +
+            labs(title = title_use) +
+            theme(plot.title = element_text(hjust = 0.5, face="bold", size = 14 * scale_factor))
+        p
+    }
+
+    SingleFeaturePlotScaled <- function(data, gene, embedding, raw_ptsize, scale_factor) {
+        # only one gene
+        scaled_ptsize <- function() {scale_factor ^ 2 * raw_ptsize}
+        gene_exp <- FetchData(data, gene)[,1]
+        cell_order <- names(gene_exp)[gene_exp %>% order()]
+        plist <- FeaturePlot(object = data, features.plot = gene, cells.use = cell_order,
+                    cols.use = c("grey90", "red"), pt.size = scaled_ptsize(), pch.use = 19, no.axes = TRUE,
+                    reduction.use = embedding, nCol=1, do.return = TRUE)
+        p <- plist[[1]] + theme(plot.title = element_text(size = 14 * scale_factor))
+        p
+    }
+
+    DotPlotScaled <- function(data, genes, scale_factor) {
             print(scale_factor)
             print(scale_factor * dpi)
-            dotplot_width <- function() {scale_factor * dpi  * (1.33 + n_distinct(data@ident)/3)}
-            dotplot_height <- function() {scale_factor * dpi * (2.5 + length(unique(genes))/4)}
+            scaled_width <- function() {scale_factor * dpi * 0.633 * (1.8 + n_distinct(data@ident)/3.5)}
+            scaled_height <- function() {scale_factor * dpi * 0.633 * (1.2 + length(unique(genes))/4) + 120}
+            scaled_ptsize <- function() {scale_factor ^ 2 * 3.8}
             pdf(file=NULL)
             p <- DotPlot2(data, color_scaling = "zero-one", size_scaling = "area",
                         genes.plot = genes, legend.position = "bottom", cols.use = c("white", "magenta"), do.return = T,
-                        dot.min=0.01, dot.scale = 6 * scale_factor, axis.label.size = 15 * scale_factor,
+                        dot.min=0.01, dot.scale = scaled_ptsize(), axis.label.size = 9 * scale_factor,
                         horizontal = FALSE) +
                         theme(legend.direction='vertical',
-                              legend.text=element_text(size=12 * scale_factor),
-                              legend.title=element_text(size=16 * scale_factor),
+                              legend.text=element_text(size=7 * scale_factor),
+                              legend.title=element_text(size=10 * scale_factor),
                               legend.key.size = unit(0.5, 'lines'))
             a <- dev.off()
-            list(p = p, width = dotplot_width, height = dotplot_height)
+            list(p = p, width = scaled_width, height = scaled_height)
         }
 
-
-    SingleFeaturePlot <- function(data, gene, pt_size, embedding) {
-            # only one gene
-            gene_exp <- FetchData(data, gene)[,1]
-            cell_order <- names(gene_exp)[gene_exp %>% order()]
-            p <- FeaturePlot(object = data, features.plot = gene, cells.use = cell_order,
-                        cols.use = c("grey90", "red"), pt.size = pt_size, pch.use = 19, no.axes = TRUE,
-                        reduction.use = embedding, nCol=1, do.return = TRUE)
-            p[[1]]
-        }
-
-        # on-plot spinner. this spinner is not transparent. Use one loading bar instead.
-        # spinner_height <- plot_width()
-        # if (is.null(spinner_height)) {
-        #     spinner_height <- "500px"
-        # } else {
-        #     spinner_height <- sprintf("%spx", as.integer(spinner_height))
-        # }
-
-    output$main_panel <- renderUI({
-        if (input$layout_type == 'horizontal') {
-            list(
-                fluidRow(
-                    column(4,
-                        switch(input$plot_type,
-                            "plotly" = plotlyOutput("clusterplot1_plotly", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height),
-                            "ggplot2" = plotOutput("clusterplot1", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height)
-                        ), align="center"
-                    ),
-                    column(4,
-                        switch(input$plot_type,
-                            "plotly" = plotlyOutput("featureplot1_plotly", height = ui_plot_height, width = ui_plot_width),
-                            "ggplot2" = plotOutput("featureplot1", height = ui_plot_height, width = ui_plot_width)
-                        ), align="center"
-                    ),
-                    column(4,
-                        shinydashboard::box(width = 12,
-                            switch(input$plot_type,
-                                "plotly" = plotlyOutput("dotplot1_plotly", height = ui_plot_height, width = ui_plot_width),
-                                "ggplot2" = plotOutput("dotplot1", height = ui_plot_height, width = ui_plot_width)
-                            ), style=sprintf("height:%spx; overflow-y:scroll;", dotplot_height) #
-                        ), align="center"
-                    )
-                ),
-                fluidRow(
-                    column(4,
-                        switch(input$plot_type,
-                            "plotly" = plotlyOutput("clusterplot2_plotly", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height),
-                            "ggplot2" = plotOutput("clusterplot2", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height)
-                        ), align="center"
-                    ),
-                    column(4,
-                        switch(input$plot_type,
-                            "plotly" = plotlyOutput("featureplot2_plotly", height = ui_plot_height, width = ui_plot_width),
-                            "ggplot2" = plotOutput("featureplot2", height = ui_plot_height, width = ui_plot_width)
-                        ), align="center"
-                    ),
-                    column(4,
-                        shinydashboard::box(width = 12,
-                            switch(input$plot_type,
-                                "plotly" = plotlyOutput("dotplot2_plotly", height = ui_plot_height, width = ui_plot_width),
-                                "ggplot2" = plotOutput("dotplot2", height = ui_plot_height, width = ui_plot_width)
-                            ), style=sprintf("height:%spx; overflow-y:scroll;", dotplot_height) #
-                        ), align="center"
-                    )
-                )
-            )
-        } else if (input$layout_type == 'vertical') {
-            list (
-                fluidRow(
-                    column(4,
-                        tabsetPanel(id = "tabset_r1c1", selected = "Clusters",
-                            tabPanel("Clusters",
-                                switch(input$plot_type,
-                                    "plotly" = plotlyOutput("clusterplot1_plotly", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height),
-                                    "ggplot2" = plotOutput("clusterplot1", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height)
-                                )
-                            ),
-                            tabPanel("Gene Expression",
-                                switch(input$plot_type,
-                                "plotly" = plotlyOutput("featureplot1_plotly", height = ui_plot_height, width = ui_plot_width),
-                                "ggplot2" = plotOutput("featureplot1", height = ui_plot_height, width = ui_plot_width)
-                                )
-                            )
-                        ), align="center"
-                    ),
-                    column(4,
-                        tabsetPanel(id = "tabset_r1c2", selected = "Clusters",
-                            tabPanel("Clusters",
-                                switch(input$plot_type,
-                                    "plotly" = plotlyOutput("clusterplot2_plotly", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height),
-                                    "ggplot2" = plotOutput("clusterplot2", height = ui_plot_height, width = ui_plot_width), # %>% withSpinner(proxy.height = spinner_height)
-                                )
-                            ),
-                            tabPanel("Gene Expression",
-                                switch(input$plot_type,
-                                    "plotly" = plotlyOutput("featureplot2_plotly", height = ui_plot_height, width = ui_plot_width),
-                                    "ggplot2" = plotOutput("featureplot2", height = ui_plot_height, width = ui_plot_width)
-                                )
-                            )
-                        ), align="center"
-                    )
-                ),
-                fluidRow(
-                    column(4,
-                        shinydashboard::box(width = 12,
-                            switch(input$plot_type,
-                                "plotly" = plotlyOutput("dotplot1_plotly", height = ui_plot_height, width = ui_plot_width),
-                                "ggplot2" = plotOutput("dotplot1", height = ui_plot_height, width = ui_plot_width)
-                            ), style=sprintf("height:%spx; overflow-y:scroll;", dotplot_height) #
-                        ), align="center"
-                    ),
-                    column(4,
-                        shinydashboard::box(width = 12,
-                            switch(input$plot_type,
-                                "plotly" = plotlyOutput("dotplot2_plotly", height = ui_plot_height, width = ui_plot_width),
-                                "ggplot2" = plotOutput("dotplot2", height = ui_plot_height, width = ui_plot_width)
-                            ), style=sprintf("height:%spx; overflow-y:scroll;", dotplot_height) #
-                        ), align="center"
-                    )
-                )
-            )
-        }
-    })
-
-    # observeEvent({
-    #     input$plot_type
-    #     input$dataset_1
-    #     input$dataset_2
-    # }, {
-    #     selected_datasets <- c(input$dataset_1, input$dataset_2)
-    #     n_datasets <- sum(selected_datasets %in% datasets)
-    # })
 
     observeEvent({
         input$dataset_1
@@ -365,21 +372,23 @@ function(input, output, session) {
         if (!is.null(seurat_data_1)) {
             #output$title1 <- renderUI({h4(data1$name)})
             # output$description1 <- renderUI({ sprintf("%s cells", ncells_1) })
-            clusterplot1 <<- list(p = DimPlot(seurat_data_1, reduction.use = data1$embedding, do.label = T, pt.size = plot_1_ptsize(),
-                                                label.size = 4, cols.use = colors_1, no.legend = T, no.axes = TRUE, do.return = TRUE,
-                                                vector.friendly = (ncells_1 > rasterize_ncells), png.arguments=png.arguments) +
-                                                labs(title = data1$name) + theme(plot.title = element_text(hjust = 0.5, face="bold")),
-                                    width = plot_width, height = plot_width)
-            output$clusterplot1 <- renderPlot({
-                validate(need(input$plot_type == 'ggplot2', message=FALSE))
-                clusterplot1$p
-            }, width = clusterplot1$width, height = clusterplot1$height, res = dpi)
+            clusterplot1 <<- list(
+                p = ClusterPlotScaled(seurat_data_1, data1$embedding, data1$name, colors_1, ncells_1, pt_size_1, scale_factor()),
+                width = plot_width,
+                height = plot_width
+            )
 
-            output$clusterplot1_plotly <- renderPlotly({
-                validate(need(input$plot_type == 'plotly', message=FALSE))
-                ggplotly(clusterplot1$p, width = clusterplot1$width(), height = clusterplot1$height(), source = "clusterplot1_plotly")
-            })
-
+            if (input$plot_type == 'ggplot2') {
+                output$clusterplot1 <- renderPlot({
+                    clusterplot1$p
+                }, width = clusterplot1$width, height = clusterplot1$height, res = dpi)
+                output$clusterplot1_plotly <- NULL
+            } else if (input$plot_type == 'plotly') {
+                output$clusterplot1_plotly <- renderPlotly({
+                    ggplotly(clusterplot1$p, width = clusterplot1$width(), height = clusterplot1$height(), source = "clusterplot1_plotly")
+                })
+                output$clusterplot1 <- NULL
+            }
         } else {
             output$title1 <- NULL
             # output$description1 <- NULL
@@ -397,20 +406,23 @@ function(input, output, session) {
         if (!is.null(seurat_data_2)) {
             #output$title2 <- renderUI({h4(data2$name)})
             # output$description2 <- renderUI({ sprintf("%s cells", ncells_2) })
-            clusterplot2 <<- list(p = DimPlot(seurat_data_2, reduction.use = data2$embedding, do.label = T, pt.size = plot_2_ptsize(),
-                                            label.size = 4, cols.use = colors_2, no.legend = T, no.axes = TRUE, do.return = TRUE,
-                                            vector.friendly = (ncells_2 > rasterize_ncells), png.arguments=png.arguments) +
-                                            labs(title = data2$name) + theme(plot.title = element_text(hjust = 0.5, face="bold")),
-                                width = plot_width, height = plot_width)
-            output$clusterplot2 <- renderPlot({
-                validate(need(input$plot_type == 'ggplot2', message=FALSE))
-                clusterplot2$p
-            }, width = clusterplot2$width, height = clusterplot2$height, res = dpi)
+            clusterplot2 <<- list(
+                p = ClusterPlotScaled(seurat_data_2, data2$embedding, data2$name, colors_2, ncells_2, pt_size_2, scale_factor()),
+                width = plot_width,
+                height = plot_width
+            )
 
-            output$clusterplot2_plotly <- renderPlotly({
-                validate(need(input$plot_type == 'plotly', message=FALSE))
-                ggplotly(clusterplot2$p, width = clusterplot2$width(), height = clusterplot2$height(), source = "clusterplot2_plotly")
-            })
+            if (input$plot_type == 'ggplot2') {
+                output$clusterplot2 <- renderPlot({
+                    clusterplot2$p
+                }, width = clusterplot2$width, height = clusterplot2$height, res = dpi)
+                output$clusterplot2_plotly <- NULL
+            } else if (input$plot_type == 'plotly') {
+                output$clusterplot2_plotly <- renderPlotly({
+                    ggplotly(clusterplot2$p, width = clusterplot2$width(), height = clusterplot2$height(), source = "clusterplot2_plotly")
+                })
+                output$clusterplot2 <- NULL
+            }
         } else {
             output$title2 <- NULL
             # output$description2 <- NULL
@@ -430,17 +442,23 @@ function(input, output, session) {
     }, {
         if (length(gene_names) == 1 && gene_names != "") {
             if (!is.null(seurat_data_1) && (gene_names %in% rownames(seurat_data_1@data))) {
-                featureplot1 <<- list(p=SingleFeaturePlot(seurat_data_1, gene_names, plot_1_ptsize(), data1$embedding),
-                                    width=plot_width, height=plot_width)
-                output$featureplot1 <- renderPlot({
-                    validate(need(input$plot_type == 'ggplot2', message=FALSE))
-                    featureplot1$p
-                }, width = featureplot1$width, height = featureplot1$height, res = dpi)
+                featureplot1 <<- list(
+                    p=SingleFeaturePlotScaled(seurat_data_1, gene_names, data1$embedding, pt_size_1, scale_factor()),
+                    width=plot_width,
+                    height=plot_width
+                )
 
-                output$featureplot1_plotly <- renderPlotly({
-                    validate(need(input$plot_type == 'plotly', message=FALSE))
-                    ggplotly(featureplot1$p, width = featureplot1$width(), height = featureplot1$height(), source = "featureplot1_plotly")
-                })
+                if (input$plot_type == 'ggplot2') {
+                    output$featureplot1 <- renderPlot({
+                        featureplot1$p
+                    }, width = featureplot1$width, height = featureplot1$height, res = dpi)
+                    output$featureplot1_plotly <- NULL
+                } else if (input$plot_type == 'plotly') {
+                    output$featureplot1_plotly <- renderPlotly({
+                        ggplotly(featureplot1$p, width = featureplot1$width(), height = featureplot1$height(), source = "featureplot1_plotly")
+                    })
+                    output$featureplot1 <- NULL
+                }
 
             } else {
                 output$featureplot1 <- NULL
@@ -460,17 +478,23 @@ function(input, output, session) {
     }, {
         if (length(gene_names) == 1 && gene_names != "") {
             if (!is.null(seurat_data_2) && (gene_names %in% rownames(seurat_data_2@data))) {
-                featureplot2 <<- list(p=SingleFeaturePlot(seurat_data_2, gene_names, plot_2_ptsize(), data2$embedding),
-                                    width=plot_width, height=plot_width)
-                output$featureplot2 <- renderPlot({
-                    validate(need(input$plot_type == 'ggplot2', message=FALSE))
-                    featureplot2$p
-                }, width = featureplot2$width, height = featureplot2$height, res = dpi)
+                featureplot2 <<- list(
+                    p=SingleFeaturePlotScaled(seurat_data_2, gene_names, data2$embedding, pt_size_2, scale_factor()),
+                    width=plot_width,
+                    height=plot_width
+                )
 
-                output$featureplot2_plotly <- renderPlotly({
-                    validate(need(input$plot_type == 'plotly', message=FALSE))
-                    ggplotly(featureplot2$p, width = featureplot2$width(), height = featureplot2$height(), source = "featureplot2_plotly")
-                })
+                if (input$plot_type == 'ggplot2') {
+                    output$featureplot2 <- renderPlot({
+                        featureplot2$p
+                    }, width = featureplot2$width, height = featureplot2$height, res = dpi)
+                    output$featureplot2_plotly <- NULL
+                } else if (input$plot_type == 'plotly') {
+                    output$featureplot2_plotly <- renderPlotly({
+                        ggplotly(featureplot2$p, width = featureplot2$width(), height = featureplot2$height(), source = "featureplot2_plotly")
+                    })
+                    output$featureplot2 <- NULL
+                }
             } else {
                 output$featureplot2 <- NULL
                 output$featureplot2_plotly <- NULL
@@ -548,21 +572,22 @@ function(input, output, session) {
 
         if (length(gene_list) > 1 || (length(gene_list) == 1 && gene_list != "")) {
             if (!is.null(seurat_data_1)) {
-                dotplot1 <<- dotplot(seurat_data_1, gene_list, scale_factor())
+                dotplot1 <<- DotPlotScaled(seurat_data_1, gene_list, scale_factor())
 
-                output$dotplot1 <- renderPlot({
-                    validate(need(input$plot_type == 'ggplot2', message=FALSE))
-                    dotplot1$p
-                }, width = dotplot1$width, height = dotplot1$height, res = dpi)
-
-                output$dotplot1_plotly <- renderPlotly({
-                    validate(need(input$plot_type == 'plotly', message=FALSE))
-                    ggplotly(dotplot1$p, width = dotplot1$width() + scale_factor() * dpi * 0.85,
-                            height = dotplot1$height() - scale_factor() * dpi * 1.1, source = "dotplot1_plotly")
-                })
+                if (input$plot_type == 'ggplot2') {
+                    output$dotplot1 <- renderPlot({
+                        dotplot1$p
+                    }, width = dotplot1$width, height = dotplot1$height, res = dpi)
+                    output$dotplot1_plotly <- NULL
+                } else if (input$plot_type == 'plotly') {
+                    output$dotplot1_plotly <- renderPlotly({
+                        ggplotly(dotplot1$p, width = dotplot1$width() + scale_factor() * dpi * 0.55,
+                                height = dotplot1$height() - 90, source = "dotplot1_plotly")
+                    })
+                    output$dotplot1 <- NULL
+                }
             }
         }
-
         if (is.null(seurat_data_1)) {
             output$dotplot1 <- NULL
             output$dotplot1_plotly <- NULL
@@ -580,22 +605,22 @@ function(input, output, session) {
 
         if (length(gene_list) > 1 || (length(gene_list) == 1 && gene_list != "")) {
             if (!is.null(seurat_data_2)) {
-                dotplot2 <<- dotplot(seurat_data_2, gene_list, scale_factor())
+                dotplot2 <<- DotPlotScaled(seurat_data_2, gene_list, scale_factor())
 
-                output$dotplot2 <- renderPlot({
-                    validate(need(input$plot_type == 'ggplot2', message=FALSE))
-                    dotplot2$p
-                }, width = dotplot2$width, height = dotplot2$height, res = dpi)
-
-                output$dotplot2_plotly <- renderPlotly({
-                    validate(need(input$plot_type == 'plotly', message=FALSE))
-                    ggplotly(dotplot2$p, width = dotplot2$width() + scale_factor() * dpi * 0.85,
-                            height = dotplot2$height() - scale_factor() * dpi * 1.1, source = "dotplot2_plotly")
-                })
+                if (input$plot_type == 'ggplot2') {
+                    output$dotplot2 <- renderPlot({
+                        dotplot2$p
+                    }, width = dotplot2$width, height = dotplot2$height, res = dpi)
+                    output$dotplot2_plotly <- NULL
+                } else if (input$plot_type == 'plotly') {
+                    output$dotplot2_plotly <- renderPlotly({
+                        ggplotly(dotplot2$p, width = dotplot2$width() + scale_factor() * dpi * 0.55,
+                                height = dotplot2$height() - 90, source = "dotplot2_plotly")
+                    })
+                    output$dotplot2 <- NULL
+                }
             }
-
         }
-
         if (is.null(seurat_data_2)) {
             output$dotplot2 <- NULL
             output$dotplot2_plotly <- NULL
