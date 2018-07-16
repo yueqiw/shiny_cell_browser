@@ -287,28 +287,65 @@ function(input, output, session) {
         input$plot_type
         session$clientData$output_clusterplot1_width
         session$clientData$output_clusterplot1_plotly_width
+        session$clientData$output_featureplot1_width
+        session$clientData$output_featureplot1_plotly_width
+        session$clientData$output_clusterplot2_width
+        session$clientData$output_clusterplot2_plotly_width
+        session$clientData$output_featureplot2_width
+        session$clientData$output_featureplot2_plotly_width
+        session$clientData$output_dotplot1_width
+        session$clientData$output_dotplot1_plotly_width
+        session$clientData$output_dotplot2_width
+        session$clientData$output_dotplot2_plotly_width
     }, {
         #print(session$clientData$output_clusterplot1_width)
         #print(session$clientData$output_clusterplot1_plotly_width)
+
+
         if(input$auto_scaling_check) {
             plot_size <<- "auto"
             plot_width <<- function() {
-                if (input$plot_type == "ggplot2") {
-                    if (is.null(session$clientData$output_clusterplot1_width) &&
-                        !is.null(session$clientData$output_clusterplot1_plotly_width)) {
-                            session$clientData$output_clusterplot1_plotly_width
-                    } else {
-                        session$clientData$output_clusterplot1_width
-                    }
-                } else if (input$plot_type == "plotly") {
-                    if (is.null(session$clientData$output_clusterplot1_plotly_width) &&
-                        !is.null(session$clientData$output_clusterplot1_width)) {
-                            session$clientData$output_clusterplot1_width
-                    } else {
-                        session$clientData$output_clusterplot1_plotly_width
-                    }
+                width_list <- list(
+                    session$clientData$output_clusterplot1_width,
+                    session$clientData$output_clusterplot1_plotly_width,
+                    session$clientData$output_clusterplot2_width,
+                    session$clientData$output_clusterplot2_plotly_width,
+                    session$clientData$output_featureplot1_width,
+                    session$clientData$output_featureplot1_plotly_width,
+                    session$clientData$output_featureplot2_width,
+                    session$clientData$output_featureplot2_plotly_width,
+                    session$clientData$output_dotplot1_width,
+                    session$clientData$output_dotplot1_plotly_width,
+                    session$clientData$output_dotplot2_width,
+                    session$clientData$output_dotplot2_plotly_width
+                )
+
+                width_list <- width_list[!sapply(width_list, is.null)]
+
+                if (length(width_list) > 0) {
+                    width_use <- width_list[[1]]
+                } else {
+                    width_use <- NULL
                 }
+                width_use
             }
+            # plot_width <<- function() {
+            #     if (input$plot_type == "ggplot2") {
+            #         if (is.null(session$clientData$output_clusterplot1_width) &&
+            #             !is.null(session$clientData$output_clusterplot1_plotly_width)) {
+            #                 session$clientData$output_clusterplot1_plotly_width
+            #         } else {
+            #             session$clientData$output_clusterplot1_width
+            #         }
+            #     } else if (input$plot_type == "plotly") {
+            #         if (is.null(session$clientData$output_clusterplot1_plotly_width) &&
+            #             !is.null(session$clientData$output_clusterplot1_width)) {
+            #                 session$clientData$output_clusterplot1_width
+            #         } else {
+            #             session$clientData$output_clusterplot1_plotly_width
+            #         }
+            #     }
+            # }
         } else {
             plot_size <<- function() {input$plot_width}
             plot_width <<- function() {input$plot_width}
