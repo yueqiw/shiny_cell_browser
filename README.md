@@ -11,8 +11,8 @@ Interactive visualization of single cell RNAseq datasets
 07-14-2018
 
   - Add Plotly interactive mode. Click on a gene in the dot plot to show it's distribution on t-SNE/UMAP.
-  - The interactive mode requires the new ggplot2 v3.0.0 and the dev branch of plotly. 
-  - Non-interactive mode works for both ggplot2 v2.2.1 and v3.0.0 
+  - The interactive mode requires the new ggplot2 `v3.0.0` and the dev branch of plotly. 
+  - Non-interactive mode works for both ggplot2 `v2.2.1` and `v3.0.0`
 
 07-13-2018
 
@@ -26,7 +26,7 @@ Interactive visualization of single cell RNAseq datasets
   - Currently support [Seurat](https://github.com/satijalab/seurat) data format.
 
 
-### Setting up and launch the App
+## Setting up and launch the App
   
   - To download the App, `git clone https://github.com/yueqiw/shiny_cell_browser.git`
   - Install dependencies as listed in the next section. 
