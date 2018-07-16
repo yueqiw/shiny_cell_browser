@@ -11,7 +11,14 @@ shinyUI(fluidPage(
     useShinyjs(),
     titlePanel(
         fluidRow(
-            column(6, window_title)  # we can potentially add more info here
+            column(6, window_title),  # we can potentially add more info here
+            column(6, div(
+                        tags$a(h4("Download Browser App", style="display:inline-block;"),
+                        href="https://github.com/yueqiw/shiny_cell_browser", target="_blank"),
+                        tags$a(img(height = 32, width = 32, src = "GitHub-Mark-64px.png", style="vertical-align:middle;"),
+                        href="https://github.com/yueqiw/shiny_cell_browser", target="_blank")
+                    ),
+                    align="right")
         ), windowTitle = window_title  # this is to display on the headers of web browser.
     ),
     sidebarLayout(
@@ -63,7 +70,7 @@ shinyUI(fluidPage(
                   min = 200, max = 800, value = 500, step = 10, ticks = FALSE),
             hr(),
             #div(),
-            div(h4(HTML("Download Figure:"))),
+            div(h4("Download Figure:")),
             fluidRow(
                 column(8, radioButtons("figure_type", NULL,
                     choiceNames = c("Clustering", "Gene Expression", "Dot Plot"),
@@ -81,6 +88,11 @@ shinyUI(fluidPage(
             # style = "position:fixed;width:inherit;",  # floating sidebar prevents reaching to the bottom when it's longer than window height.
             # tags$head(tags$style(".loading{height:30px;}"  # two ways to add styles: 1. here, 2. use style="xxx" in each box.
             #   )),
+            tags$head(tags$style("a: {text-decoration: none;}
+                    a:link {color: black;}
+                   a:visited {color: black;}
+                   a:hover {color: black;}
+                   a:active {color: black;}")),
             width=2
         ),
         mainPanel(
