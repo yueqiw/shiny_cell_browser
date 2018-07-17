@@ -3,7 +3,7 @@ FROM r-base
 RUN apt-get update && apt-get install -y \
   libcurl4-openssl-dev \
   libssl-dev \
-  libxml2-dev
+  libxml2-dev libhdf5-dev
 
 RUN mkdir -p /app/data
 
