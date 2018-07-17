@@ -18,6 +18,7 @@ RUN R -e 'install.packages(c("shinyjs"))'
 RUN R -e 'install.packages(c("shinydashboard"))'
 RUN R -e 'install.packages(c("tidyverse"))'
 RUN R -e 'install.packages(c("ggplot2"))'
+RUN R -e 'install.packages(c("devtools"))'
 RUN R -e 'devtools::install_github("ropensci/plotly")'
 
 ADD . /app/
