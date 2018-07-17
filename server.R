@@ -73,6 +73,38 @@ if (!all(startup_datasets %in% c(datasets, "none"))) {
 
 # print(dataset_selector)
 
+# -------------------------
+# Read data into global environment. Share between different sessions.
+
+read_data <- function(x) {
+    # load data and metadata specified by the JSON string.
+    # x: individual json string, with [name, file, clusters embedding]
+    seurat_data <- readRDS(x$file)
+    seurat_data <- SetAllIdent(seurat_data,  x$clusters)
+    ncells <- length(seurat_data@cell.names)
+    pt_size <- calc_pt_size(ncells)
+    colors <- seurat_data@misc[[sprintf("%s_colors",  x$clusters)]]
+    if (is.null(colors)) {
+        set.seed(2)
+        colors <- sample(rainbow(n_distinct(seurat_data@ident)))
+    }
+    genes <- rownames(seurat_data@data)
+    list(
+        name = x$name,
+        seurat_data = seurat_data,
+        ncells = ncells,
+        pt_size = pt_size,
+        embedding = x$embedding,
+        colors = colors,
+        genes = genes
+    )
+}
+
+data_list <- lapply(json_data, read_data)
+
+
+# --------------------------
+# Sever sessions
 
 function(input, output, session) {
 
@@ -266,49 +298,25 @@ function(input, output, session) {
     observeEvent({
         input$dataset_1
     }, {
-        #print(input$dataset_1)
         if (input$dataset_1 %in% datasets) {
-            data1 <<- json_data[[as.numeric(input$dataset_1)]]
-            #print(data1)
-            seurat_data_1 <<- readRDS(data1$file)
-            seurat_data_1 <<- SetAllIdent(seurat_data_1,  data1$clusters)
-            ncells_1 <<- length(seurat_data_1@cell.names)
-            pt_size_1 <<- calc_pt_size(ncells_1)
-            data1$embedding <<- data1$embedding
-            colors_1 <<- seurat_data_1@misc[[sprintf("%s_colors",  data1$clusters)]]
-            if (is.null(colors_1)) colors_1 <<- rainbow(n_distinct(seurat_data_1@ident))
-            genes_1 <<- rownames(seurat_data_1@data)
+            data1 <<- data_list[[as.numeric(input$dataset_1)]]
         } else {
-            seurat_data_1 <<- NULL
-            genes_1 <<- NULL
+            data1 <<- NULL
         }
-
         output$featureplot1 <- NULL
         output$featureplot1_plotly <- NULL
         output$dotplot1 <- NULL
         output$dotplot1_plotly <- NULL
-
     })
 
     observeEvent({
         input$dataset_2
     }, {
-
         if (input$dataset_2 %in% datasets) {
-            data2 <<- json_data[[as.numeric(input$dataset_2)]]
-            seurat_data_2 <<- readRDS(data2$file)
-            seurat_data_2 <<- SetAllIdent(seurat_data_2, data2$clusters)
-            ncells_2 <<- length(seurat_data_2@cell.names)
-            pt_size_2 <<- calc_pt_size(ncells_2)
-            data2$embedding <<- data2$embedding
-            colors_2 <<- seurat_data_2@misc[[sprintf("%s_colors", data2$clusters)]]
-            if (is.null(colors_2)) colors_2 <<- rainbow(n_distinct(seurat_data_2@ident))
-            genes_2 <<- rownames(seurat_data_2@data)
+            data2 <<- data_list[[as.numeric(input$dataset_2)]]
         } else {
-            seurat_data_2 <<- NULL
-            genes_2 <<- NULL
+            data2 <<- NULL
         }
-
         output$featureplot2 <- NULL
         output$featureplot2_plotly <- NULL
         output$dotplot2 <- NULL
@@ -318,27 +326,15 @@ function(input, output, session) {
     observeEvent({
         input$dataset_3
     }, {
-
         if (input$dataset_3 %in% datasets) {
-            data3 <<- json_data[[as.numeric(input$dataset_3)]]
-            seurat_data_3 <<- readRDS(data3$file)
-            seurat_data_3 <<- SetAllIdent(seurat_data_3, data3$clusters)
-            ncells_3 <<- length(seurat_data_3@cell.names)
-            pt_size_3 <<- calc_pt_size(ncells_3)
-            data3$embedding <<- data3$embedding
-            colors_3 <<- seurat_data_3@misc[[sprintf("%s_colors", data3$clusters)]]
-            if (is.null(colors_3)) colors_3 <<- rainbow(n_distinct(seurat_data_3@ident))
-            genes_3 <<- rownames(seurat_data_3@data)
+            data3 <<- data_list[[as.numeric(input$dataset_3)]]
         } else {
-            seurat_data_3 <<- NULL
-            genes_3 <<- NULL
+            data3 <<- NULL
         }
-
         output$featureplot3 <- NULL
         output$featureplot3_plotly <- NULL
         output$dotplot3 <- NULL
         output$dotplot3_plotly <- NULL
-
     })
 
     observeEvent({
@@ -347,7 +343,7 @@ function(input, output, session) {
         input$dataset_3
     }, {
         gene_names <<- ""
-        all_genes <<- as.list(c("", sort(unique(c(genes_1, genes_2, genes_3)))))
+        all_genes <<- as.list(c("", sort(unique(c(data1$genes, data2$genes, data3$genes)))))
         #print(all_genes[1:5])
         print(length(all_genes))
         updateSelectizeInput(session, 'gene_symbol', choices = all_genes, server = F)
@@ -504,11 +500,12 @@ function(input, output, session) {
         #session$clientData$output_clusterplot1_plotly_width
     }, {
 
-        if (!is.null(seurat_data_1)) {
+        if (!is.null(data1$seurat_data)) {
             #output$title1 <- renderUI({h4(data1$name)})
-            # output$description1 <- renderUI({ sprintf("%s cells", ncells_1) })
+            # output$description1 <- renderUI({ sprintf("%s cells", data1$ncells) })
             clusterplot1 <<- list(
-                p = ClusterPlotScaled(seurat_data_1, data1$embedding, data1$name, colors_1, ncells_1, pt_size_1, scale_factor()),
+                p = ClusterPlotScaled(data1$seurat_data, data1$embedding, data1$name,
+                            data1$colors, data1$ncells, data1$pt_size, scale_factor()),
                 width = plot_width,
                 height = plot_width
             )
@@ -541,11 +538,12 @@ function(input, output, session) {
         #session$clientData$output_clusterplot2_width
         #session$clientData$output_clusterplot2_plotly_width
     }, {
-        if (!is.null(seurat_data_2)) {
+        if (!is.null(data2$seurat_data)) {
             #output$title2 <- renderUI({h4(data2$name)})
-            # output$description2 <- renderUI({ sprintf("%s cells", ncells_2) })
+            # output$description2 <- renderUI({ sprintf("%s cells", data2$ncells) })
             clusterplot2 <<- list(
-                p = ClusterPlotScaled(seurat_data_2, data2$embedding, data2$name, colors_2, ncells_2, pt_size_2, scale_factor()),
+                p = ClusterPlotScaled(data2$seurat_data, data2$embedding, data2$name,
+                            data2$colors, data2$ncells, data2$pt_size, scale_factor()),
                 width = plot_width,
                 height = plot_width
             )
@@ -577,11 +575,12 @@ function(input, output, session) {
         scale_factor()
         #input$dimension[1]
     }, {
-        if (!is.null(seurat_data_3)) {
+        if (!is.null(data3$seurat_data)) {
             #output$title3 <- renderUI({h4(data3$name)})
-            # output$description3 <- renderUI({ sprintf("%s cells", ncells_3) })
+            # output$description3 <- renderUI({ sprintf("%s cells", data3$ncells) })
             clusterplot3 <<- list(
-                p = ClusterPlotScaled(seurat_data_3, data3$embedding, data3$name, colors_3, ncells_3, pt_size_3, scale_factor()),
+                p = ClusterPlotScaled(data3$seurat_data, data3$embedding, data3$name,
+                            data3$colors, data3$ncells, data3$pt_size, scale_factor()),
                 width = plot_width,
                 height = plot_width
             )
@@ -617,9 +616,9 @@ function(input, output, session) {
         scale_factor()
     }, {
         if (length(gene_names) == 1 && gene_names != "") {
-            if (!is.null(seurat_data_1) && (gene_names %in% rownames(seurat_data_1@data))) {
+            if (!is.null(data1$seurat_data) && (gene_names %in% data1$genes)) {
                 featureplot1 <<- list(
-                    p=SingleFeaturePlotScaled(seurat_data_1, gene_names, data1$embedding, pt_size_1, scale_factor()),
+                    p=SingleFeaturePlotScaled(data1$seurat_data, gene_names, data1$embedding, data1$pt_size, scale_factor()),
                     width=plot_width,
                     height=plot_width
                 )
@@ -653,9 +652,9 @@ function(input, output, session) {
         scale_factor()
     }, {
         if (length(gene_names) == 1 && gene_names != "") {
-            if (!is.null(seurat_data_2) && (gene_names %in% rownames(seurat_data_2@data))) {
+            if (!is.null(data2$seurat_data) && (gene_names %in% data2$genes)) {
                 featureplot2 <<- list(
-                    p=SingleFeaturePlotScaled(seurat_data_2, gene_names, data2$embedding, pt_size_2, scale_factor()),
+                    p=SingleFeaturePlotScaled(data2$seurat_data, gene_names, data2$embedding, data2$pt_size, scale_factor()),
                     width=plot_width,
                     height=plot_width
                 )
@@ -687,9 +686,9 @@ function(input, output, session) {
         scale_factor()
     }, {
         if (length(gene_names) == 1 && gene_names != "") {
-            if (!is.null(seurat_data_3) && (gene_names %in% rownames(seurat_data_3@data))) {
+            if (!is.null(data3$seurat_data) && (gene_names %in% data3$genes)) {
                 featureplot3 <<- list(
-                    p=SingleFeaturePlotScaled(seurat_data_3, gene_names, data3$embedding, pt_size_3, scale_factor()),
+                    p=SingleFeaturePlotScaled(data3$seurat_data, gene_names, data3$embedding, data3$pt_size, scale_factor()),
                     width=plot_width,
                     height=plot_width
                 )
@@ -741,8 +740,8 @@ function(input, output, session) {
     }, {
 
         if (length(gene_list) > 1 || (length(gene_list) == 1 && gene_list != "")) {
-            if (!is.null(seurat_data_1)) {
-                dotplot1 <<- DotPlotScaled(seurat_data_1, gene_list, scale_factor())
+            if (!is.null(data1$seurat_data)) {
+                dotplot1 <<- DotPlotScaled(data1$seurat_data, gene_list, scale_factor())
 
                 if (input$plot_type == 'ggplot2') {
                     output$dotplot1 <- renderPlot({
@@ -758,7 +757,7 @@ function(input, output, session) {
                 }
             }
         }
-        if (is.null(seurat_data_1)) {
+        if (is.null(data1$seurat_data)) {
             output$dotplot1 <- NULL
             output$dotplot1_plotly <- NULL
         }
@@ -774,8 +773,8 @@ function(input, output, session) {
     }, {
 
         if (length(gene_list) > 1 || (length(gene_list) == 1 && gene_list != "")) {
-            if (!is.null(seurat_data_2)) {
-                dotplot2 <<- DotPlotScaled(seurat_data_2, gene_list, scale_factor())
+            if (!is.null(data2$seurat_data)) {
+                dotplot2 <<- DotPlotScaled(data2$seurat_data, gene_list, scale_factor())
 
                 if (input$plot_type == 'ggplot2') {
                     output$dotplot2 <- renderPlot({
@@ -791,7 +790,7 @@ function(input, output, session) {
                 }
             }
         }
-        if (is.null(seurat_data_2)) {
+        if (is.null(data2$seurat_data)) {
             output$dotplot2 <- NULL
             output$dotplot2_plotly <- NULL
         }
@@ -807,8 +806,8 @@ function(input, output, session) {
     }, {
 
         if (length(gene_list) > 1 || (length(gene_list) == 1 && gene_list != "")) {
-            if (!is.null(seurat_data_3)) {
-                dotplot3 <<- DotPlotScaled(seurat_data_3, gene_list, scale_factor())
+            if (!is.null(data3$seurat_data)) {
+                dotplot3 <<- DotPlotScaled(data3$seurat_data, gene_list, scale_factor())
 
                 if (input$plot_type == 'ggplot2') {
                     output$dotplot3 <- renderPlot({
@@ -824,7 +823,7 @@ function(input, output, session) {
                 }
             }
         }
-        if (is.null(seurat_data_3)) {
+        if (is.null(data3$seurat_data)) {
             output$dotplot3 <- NULL
             output$dotplot3_plotly <- NULL
         }
