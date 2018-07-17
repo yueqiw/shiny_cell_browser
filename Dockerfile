@@ -14,7 +14,11 @@ VOLUME /app/data
 RUN R -e 'install.packages(c("Seurat"))'
 RUN R -e 'install.packages(c("rjson"))'
 RUN R -e 'install.packages(c("shiny"))'
+RUN R -e 'install.packages(c("shinyjs"))'
+RUN R -e 'install.packages(c("shinydashboard"))'
 RUN R -e 'install.packages(c("tidyverse"))'
+RUN R -e 'install.packages(c("ggplot2"))'
+RUN R -e 'devtools::install_github("ropensci/plotly")'
 
 ADD . /app/
 
