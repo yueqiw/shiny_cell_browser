@@ -10,46 +10,15 @@ source("./utils.R")
 # Shiny Single Cell Browser
 # -------------------------
 # Interactive visualization of single cell RNAseq datasets
-#
-# 07-14-2018
-#
-# Add Plotly interactive mode. Click on a gene in the dot plot to show it's distribution on t-SNE/UMAP.
-# The interactive mode requires the new ggplot2 v3.0.0 and the dev branch of plotly.
-# Non-interactive mode works for both ggplot2 v2.2.1 and v3.0.0
-#
-# 07-13-2018
-#
-# Visualize two datasets simultaneously. Can easily switch beteen more datasets from the dropdown menu.
-# Plot cluster distribution on UMAP/t-SNE plots.
-# Plot the expression pattern of individual marker genes on UMAP/t-SNE embeddings.
-# Plot cluster-averaged expression of mfarker gene lists using dot plots.
-# Automatic resizing/scaling of figures to fit different browser windows and screen resolutions.
-# Export publication-quality figures in PDF and PNG formats. (recommend using manual resizing for consistency)
-# Specify pre-analyzed datasets in the JSON config file (see example_config.json).
-# Currently support Seurat data format.
-
-
-
-# TODO:
-# add figure legend -- done.
-# Add argument parser
-# Add precomputed marker genes into Seurat data
-# Add Plotly interactive plots  -- done
-# Click on cluster labels and show significant marker genes
-# Click on dotplot gene and show tsne/umap  -- done
-# Calculate gene module score with gene lists and plot on tsne/umap
-# Make it into a package
 
 ui_plot_width <- "100%"
 ui_plot_height <- "auto"
 
-#options(spinner.color="#0dc5c1")
-
-calc_pt_size <- function(n) {30 / n^0.5}
 plot_inch <- 4
 dpi <- 125  # for web display. The saved plots have higher dpi
 fixed_plot_size <- dpi * plot_inch
 dotplot_height <- 500  # height in vertical layout (can expand to make it longer. )
+calc_pt_size <- function(n) {30 / n^0.5}
 
 # png.arguments <- c(4,4,300)
 # rasterize_ncells <- 150000  # This might nor work for plotly. usually use ~2000. But now vector.friendly does not work for ggplot 3.0, so I disabled this.
@@ -60,6 +29,7 @@ datasets <- 1:length(json_data)
 dataset_names <- sapply(json_data, function(x) x$name)
 dataset_selector <- as.list(c(datasets, "none"))
 names(dataset_selector) <- c(dataset_names, "None")
+# print(dataset_selector)
 
 config <- json_file$config
 
@@ -74,7 +44,15 @@ if (!all(startup_datasets %in% c(datasets, "none"))) {
 default_single_gene <- config$default_single_gene
 
 
-# print(dataset_selector)
+# TODO:
+# add figure legend -- done.
+# Add precomputed marker genes into Seurat data
+# Add Plotly interactive plots  -- done
+# Click on cluster labels and show significant marker genes
+# Click on dotplot gene and show tsne/umap  -- done
+# Calculate gene module score with gene lists and plot on tsne/umap
+# package
+
 
 # -------------------------
 # Read data into global environment. Share between different sessions.
