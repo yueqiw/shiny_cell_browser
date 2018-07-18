@@ -1,5 +1,5 @@
-library(Seurat)
 library(tidyverse)
+library(Seurat)
 library(plotly)  # dev branch
 #library(rjson)
 source("./utils.R")
