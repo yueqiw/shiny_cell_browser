@@ -5,7 +5,7 @@ Open-source interactive visualization of single cell RNAseq datasets
 
   - Explore up to 3 datasets simultaneously and interactively in the same browser window. 
   - Visualize cluster distribution, marker gene expression and cluster-averaged expression of gene lists. 
-  - Interactive mode: clicking on individual genes in the gene list plot shows their expression on t-SNE/UMAP plot. 
+  - Interactive visualization: clicking on individual genes in the gene list plot shows their expression on t-SNE/UMAP plot. 
   - Export publication-quality figures in PDF and PNG format. 
   - Easily switch between horizontal vs. vertical layouts and automatic vs. manual figure resizing. 
   - Specify pre-analyzed datasets ([Seurat](https://github.com/satijalab/seurat) format) in the JSON config file for automatic data loading.
@@ -18,7 +18,7 @@ Open-source interactive visualization of single cell RNAseq datasets
   - To update, `cd shiny_cell_browser` then `git pull`
   - Store Seurat data objects as `.rds` files 
   - Optionally, store cluster colors as a vector in `seurat_data@misc[[sprintf("%s_colors", cluster_name)]]`
-  - Specify the file paths and clustering results in the `config.json` file. Follow the example in `example_config.json`. The App will automatically open the files specified in `startup_data1/2/3`. 
+  - Specify the file paths and clustering results by creating `data/config.json` file. Follow the example in [`data/example_config.json`](data/example_config.json). The App will automatically open the files specified in `startup_data1/2/3`. 
   - To launch Single Cell Browser locally, run the following code.  
   ```
   cd shiny_cell_browser
@@ -50,7 +50,10 @@ Example `config.json` file:
     "config": {
         "startup_data1": 1,
         "startup_data2": 2,
-        "startup_data3": "none"
+        "startup_data3": "none",
+        "default_layout": "horizontal",
+        "default_viz_mode": "interactive",
+        "default_single_gene": "none"
     }
 }
 ```
@@ -71,6 +74,9 @@ For plotly interactive mode, install ggplot2 3.0.0 and developmental branch of p
 For non-interactive mode, ggplot2==2.2.1 also works. 
   
 ## Updates
+
+07-17-2018
+  - Moved data loading to the global environment rather than per user session. Added more config options. 
   
 07-15-2018
   - Visualize up to 3 datasets simultaneously and interactively in the same window. 
