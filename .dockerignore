@@ -1,4 +1,5 @@
 data
+assets
 .git
 .ipynb_checkpoints
 Dockerfile
