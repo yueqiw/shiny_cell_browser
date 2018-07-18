@@ -347,14 +347,16 @@ function(input, output, session) {
     }, {
         gene_names <<- ""
         all_genes <<- as.list(c("", sort(unique(c(data1$genes, data2$genes, data3$genes)))))
-        if (default_single_gene == "first") gene_names <<- all_genes[[1]]
-        if (default_single_gene %in% all_genes) gene_names <<- default_single_gene
+        if (input$gene_symbol == "") {
+            # first time loading
+            if (default_single_gene == "first" && length(all_genes) > 1) gene_names <<- all_genes[[2]]
+            if (default_single_gene %in% all_genes) gene_names <<- default_single_gene
+        }
 
         #print(all_genes[1:5])
+        print(gene_names)
         print(length(all_genes))
         updateSelectizeInput(session, 'gene_symbol', choices = all_genes, selected = gene_names, server = F)
-
-
 
         if (input$layout_type == 'vertical') {
             updateTabsetPanel(session, "tabset_r1c1", selected = "Clusters")

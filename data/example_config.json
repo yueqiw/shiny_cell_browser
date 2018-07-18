@@ -28,7 +28,10 @@
     "config": {
         "startup_data1": 1,
         "startup_data2": "none",
-        "startup_data3": "none"
+        "startup_data3": "none",
+        "default_layout": "horizontal",
+        "default_viz_mode": "interactive",
+        "default_single_gene": "none"
     }
 
 }
