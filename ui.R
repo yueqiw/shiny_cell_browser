@@ -1,6 +1,27 @@
 library(shiny)
 library(shinyjs)
 library(plotly)
+library(rjson)
+
+json_file <- fromJSON(file = './data/config.json')
+config <- json_file$config
+default_layout <- tolower(config$default_layout)
+if (!default_layout %in% c("vertical", "horizontal")) {
+    warning(sprintf("config.json: default_layout needs to be one of %s", paste(c("vertical", "horizontal"), collapse = ", ")))
+    default_layout <- "horizontal"
+}
+
+default_viz_mode <- switch(
+    tolower(config$default_viz_mode),
+    "basic" = "ggplot2",
+    "interactive" = "plotly"
+)
+
+if (is.null(default_viz_mode)) {
+    warning(sprintf("config.json: default_viz_mode needs to be one of %s", paste(c("basic", "interactive"), collapse = ", ")))
+    default_viz_mode <- "plotly"
+}
+
 
 ui_plot_width <- "100%"
 ui_plot_height <- "auto"
@@ -57,9 +78,9 @@ shinyUI(fluidPage(
             ),
 
             radioButtons("plot_type", "Visualization Mode:", choices = c("Basic" = "ggplot2", "Interactive" = "plotly"),
-                            selected = "ggplot2", inline = TRUE),
+                            selected = default_viz_mode, inline = TRUE),
             radioButtons("layout_type", "Layout:", choices = c("Vertical" = "vertical", "Horizontal" = "horizontal"),
-                            selected = "vertical", inline = TRUE),
+                            selected = default_layout, inline = TRUE),
 
             checkboxInput("auto_scaling_check", "Auto scale figure size", value = TRUE),
             # checkboxGroupInput("checkboxes", label = NULL,

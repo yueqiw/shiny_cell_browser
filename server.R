@@ -51,10 +51,10 @@ dpi <- 125  # for web display. The saved plots have higher dpi
 fixed_plot_size <- dpi * plot_inch
 dotplot_height <- 500  # height in vertical layout (can expand to make it longer. )
 
-png.arguments <- c(4,4,300)
-rasterize_ncells <- 150000  # usually use ~2000. But now vector.friendly does not work for ggplot 3.0, so I disabled this.
+# png.arguments <- c(4,4,300)
+# rasterize_ncells <- 150000  # This might nor work for plotly. usually use ~2000. But now vector.friendly does not work for ggplot 3.0, so I disabled this.
 
-json_file <- fromJSON(file = './config.json')
+json_file <- fromJSON(file = './data/config.json')
 json_data <- json_file$data
 datasets <- 1:length(json_data)
 dataset_names <- sapply(json_data, function(x) x$name)
@@ -70,6 +70,9 @@ if (!all(startup_datasets %in% c(datasets, "none"))) {
     warning(sprintf("`startup_data1/2/3` needs to be one of %s", paste(dataset_selector, collapse = ", ")))
     startup_datasets[!startup_datasets %in% dataset_selector] <- "none"
 }
+
+default_single_gene <- config$default_single_gene
+
 
 # print(dataset_selector)
 
@@ -344,9 +347,14 @@ function(input, output, session) {
     }, {
         gene_names <<- ""
         all_genes <<- as.list(c("", sort(unique(c(data1$genes, data2$genes, data3$genes)))))
+        if (default_single_gene == "first") gene_names <<- all_genes[[1]]
+        if (default_single_gene %in% all_genes) gene_names <<- default_single_gene
+
         #print(all_genes[1:5])
         print(length(all_genes))
-        updateSelectizeInput(session, 'gene_symbol', choices = all_genes, server = F)
+        updateSelectizeInput(session, 'gene_symbol', choices = all_genes, selected = gene_names, server = F)
+
+
 
         if (input$layout_type == 'vertical') {
             updateTabsetPanel(session, "tabset_r1c1", selected = "Clusters")
@@ -448,7 +456,7 @@ function(input, output, session) {
         scaled_ptsize <- function() {scale_factor ^ 2 * raw_ptsize}
         p <- DimPlot(data, reduction.use = embedding, do.label = T, pt.size = scaled_ptsize(),
                 label.size = 4 * scale_factor, cols.use = colors_use, no.legend = T, no.axes = TRUE, do.return = TRUE,
-                vector.friendly = (n_cells > rasterize_ncells), png.arguments=png.arguments)
+                vector.friendly = FALSE)
         p <- p +
             labs(title = title_use) +
             theme(plot.title = element_text(hjust = 0.5, face="bold", size = 14 * scale_factor))
@@ -517,7 +525,9 @@ function(input, output, session) {
                 output$clusterplot1_plotly <- NULL
             } else if (input$plot_type == 'plotly') {
                 output$clusterplot1_plotly <- renderPlotly({
-                    ggplotly(clusterplot1$p, width = clusterplot1$width(), height = clusterplot1$height(), source = "clusterplot1_plotly")
+                    ggplotly(clusterplot1$p, width = clusterplot1$width(), height = clusterplot1$height(),
+                            tooltip = c("factor(x = ident)"),
+                            source = "clusterplot1_plotly")
                 })
                 output$clusterplot1 <- NULL
             }
@@ -555,7 +565,9 @@ function(input, output, session) {
                 output$clusterplot2_plotly <- NULL
             } else if (input$plot_type == 'plotly') {
                 output$clusterplot2_plotly <- renderPlotly({
-                    ggplotly(clusterplot2$p, width = clusterplot2$width(), height = clusterplot2$height(), source = "clusterplot2_plotly")
+                    ggplotly(clusterplot2$p, width = clusterplot2$width(), height = clusterplot2$height(),
+                            tooltip = c("factor(x = ident)"),
+                            source = "clusterplot2_plotly")
                 })
                 output$clusterplot2 <- NULL
             }
@@ -592,7 +604,9 @@ function(input, output, session) {
                 output$clusterplot3_plotly <- NULL
             } else if (input$plot_type == 'plotly') {
                 output$clusterplot3_plotly <- renderPlotly({
-                    ggplotly(clusterplot3$p, width = clusterplot3$width(), height = clusterplot3$height(), source = "clusterplot3_plotly")
+                    ggplotly(clusterplot3$p, width = clusterplot3$width(), height = clusterplot3$height(),
+                            tooltip = c("factor(x = ident)"),
+                            source = "clusterplot3_plotly")
                 })
                 output$clusterplot3 <- NULL
             }
@@ -630,7 +644,9 @@ function(input, output, session) {
                     output$featureplot1_plotly <- NULL
                 } else if (input$plot_type == 'plotly') {
                     output$featureplot1_plotly <- renderPlotly({
-                        ggplotly(featureplot1$p, width = featureplot1$width(), height = featureplot1$height(), source = "featureplot1_plotly")
+                        ggplotly(featureplot1$p, width = featureplot1$width(), height = featureplot1$height(),
+                                tooltip = c("gene"),
+                                source = "featureplot1_plotly")
                     })
                     output$featureplot1 <- NULL
                 }
@@ -666,7 +682,9 @@ function(input, output, session) {
                     output$featureplot2_plotly <- NULL
                 } else if (input$plot_type == 'plotly') {
                     output$featureplot2_plotly <- renderPlotly({
-                        ggplotly(featureplot2$p, width = featureplot2$width(), height = featureplot2$height(), source = "featureplot2_plotly")
+                        ggplotly(featureplot2$p, width = featureplot2$width(), height = featureplot2$height(),
+                                tooltip = c("gene"),
+                                source = "featureplot2_plotly")
                     })
                     output$featureplot2 <- NULL
                 }
@@ -700,7 +718,9 @@ function(input, output, session) {
                     output$featureplot3_plotly <- NULL
                 } else if (input$plot_type == 'plotly') {
                     output$featureplot3_plotly <- renderPlotly({
-                        ggplotly(featureplot3$p, width = featureplot3$width(), height = featureplot3$height(), source = "featureplot3_plotly")
+                        ggplotly(featureplot3$p, width = featureplot3$width(), height = featureplot3$height(),
+                                tooltip = c("gene"),
+                                source = "featureplot3_plotly")
                     })
                     output$featureplot3 <- NULL
                 }

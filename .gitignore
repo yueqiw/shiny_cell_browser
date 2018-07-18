@@ -1,8 +1,10 @@
 .DS_Store
-config.json
+
 
 # Data files
-data/
+data/*
+config.json
+!data/example_config.json
 assets/screenshots
 
 # History files
