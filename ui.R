@@ -1,9 +1,8 @@
 library(shiny)
 library(shinyjs)
-library(plotly)
-library(rjson)
+# library(rjson)
 
-json_file <- fromJSON(file = './data/config.json')
+json_file <- rjson::fromJSON(file = './data/config.json')
 config <- json_file$config
 default_layout <- tolower(config$default_layout)
 if (!default_layout %in% c("vertical", "horizontal")) {

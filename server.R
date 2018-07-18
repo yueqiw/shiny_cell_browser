@@ -1,9 +1,7 @@
-library(tidyverse)
 library(Seurat)
-library(rjson)
+library(tidyverse)
 library(plotly)  # dev branch
-library(ggplot2)  # dev branch
-#library(shinycssloaders)
+#library(rjson)
 source("./utils.R")
 
 # -------------------------
@@ -23,7 +21,7 @@ calc_pt_size <- function(n) {30 / n^0.5}
 # png.arguments <- c(4,4,300)
 # rasterize_ncells <- 150000  # This might nor work for plotly. usually use ~2000. But now vector.friendly does not work for ggplot 3.0, so I disabled this.
 
-json_file <- fromJSON(file = './data/config.json')
+json_file <- rjson::fromJSON(file = './data/config.json')
 json_data <- json_file$data
 datasets <- 1:length(json_data)
 dataset_names <- sapply(json_data, function(x) x$name)
@@ -866,9 +864,9 @@ function(input, output, session) {
           plot_use <- get(sprintf("%s%s", input$figure_type, input$dataset))
           #print(plot_use())
           if (input$filetype == 'pdf') {
-              ggsave(plot = plot_use$p, filename = file, width = plot_use$width() / dpi, height = plot_use$height() / dpi)
+              ggplot2::ggsave(plot = plot_use$p, filename = file, width = plot_use$width() / dpi, height = plot_use$height() / dpi)
           } else if (input$filetype == 'png') {
-              ggsave(plot = plot_use$p, filename = file, width = plot_use$width() / dpi, height = plot_use$height() / dpi, units = 'in', dpi = 300)
+              ggplot2::ggsave(plot = plot_use$p, filename = file, width = plot_use$width() / dpi, height = plot_use$height() / dpi, units = 'in', dpi = 300)
           }
         }
     )
