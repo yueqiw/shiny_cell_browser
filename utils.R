@@ -11,7 +11,7 @@ DotPlot2 <- function(
   genes.plot,
   color_scaling = "zero-one", # or "mean-var"
   size_scaling = "area", # or "radius"
-  cols.use = c("grey90", "red"),
+  cols.use = c("white", "magenta"),
   horizontal = FALSE,
   col.min = -2.5,
   col.max = 2.5,
