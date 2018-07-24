@@ -864,9 +864,9 @@ function(input, output, session) {
           plot_use <- get(sprintf("%s%s", input$figure_type, input$dataset))
           #print(plot_use())
           if (input$filetype == 'pdf') {
-              ggplot2::ggsave(plot = plot_use$p, filename = file, width = plot_use$width() / dpi, height = plot_use$height() / dpi)
+              ggsave(plot = plot_use$p, filename = file, width = plot_use$width() / dpi, height = plot_use$height() / dpi)
           } else if (input$filetype == 'png') {
-              ggplot2::ggsave(plot = plot_use$p, filename = file, width = plot_use$width() / dpi, height = plot_use$height() / dpi, units = 'in', dpi = 300)
+              ggsave(plot = plot_use$p, filename = file, width = plot_use$width() / dpi, height = plot_use$height() / dpi, units = 'in', dpi = 300)
           }
         }
     )
