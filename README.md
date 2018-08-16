@@ -60,7 +60,7 @@ Check the Dockerfile.
   
 ## Updates
 08-15-2018
-  - Full application rewrite for speed and simplicity.  Table added for differential expression navigation.  Download features still need to be re-implemented.
+  - Full application rewrite for speed and simplicity in viewing only 1 dataset at a time.  Table added for differential expression navigation.  Download features still need to be re-implemented.
 
 07-17-2018
   - Moved data loading to the global environment rather than per user session. Added more config options. 
