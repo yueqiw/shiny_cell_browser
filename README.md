@@ -1,13 +1,11 @@
 
 ## Shiny Single Cell Browser
 
-Open-source interactive visualization of single cell RNAseq datasets
+Open-source interactive visualization of single cell RNAseq datasets. Features include:
 
-Note: the default layout will change to one dataset in the next version. 
   - Visualize cluster distribution, marker gene expression and cluster-averaged expression of gene lists. 
   - Interactive visualization: clicking on individual genes in the gene list plot shows their expression on t-SNE/UMAP plot. 
   - Specify pre-analyzed datasets ([Seurat](https://github.com/satijalab/seurat) format) in the JSON config file for automatic data loading.
-
 
 ## Setting up and launch the App
   
