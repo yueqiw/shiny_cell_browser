@@ -5,7 +5,7 @@ library(DT)
 
 ui <- fluidPage(
   shinyjs::useShinyjs(),
-  titlePanel("U Brain Browser"),
+  titlePanel("Shiny Cell Browser"),
   sidebarLayout(fluid=TRUE,
                 sidebarPanel(width=2,
                              selectInput(inputId = "selected_dataset", label = "Dataset", choices = NULL),
