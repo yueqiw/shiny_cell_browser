@@ -1,17 +1,11 @@
 
 ## Shiny Single Cell Browser
 
-Open-source interactive visualization of single cell RNAseq datasets
+Open-source interactive visualization of single cell RNAseq datasets. Features include:
 
-Note: the default layout will change to one dataset in the next version. 
-
-  - Explore up to 3 datasets simultaneously and interactively in the same browser window. 
   - Visualize cluster distribution, marker gene expression and cluster-averaged expression of gene lists. 
   - Interactive visualization: clicking on individual genes in the gene list plot shows their expression on t-SNE/UMAP plot. 
-  - Export publication-quality figures in PDF and PNG format. 
-  - Easily switch between horizontal vs. vertical layouts and automatic vs. manual figure resizing. 
   - Specify pre-analyzed datasets ([Seurat](https://github.com/satijalab/seurat) format) in the JSON config file for automatic data loading.
-
 
 ## Setting up and launch the App
   
@@ -62,20 +56,11 @@ Example `config.json` file:
 
 ### Dependencies
 
-  - R==3.4.3 or 3.5.0
-  - Seurat==2.3.2
-  - rjson==0.2.15
-  - shiny==1.1.0
-  - shinyjs==1.0
-  - tidyverse==1.2.1
-
-For plotly interactive mode, install ggplot2 3.0.0 and developmental branch of plotly
-  - ggplot2==3.0.0
-  - plotly==4.7.1  `devtools::install_github("ropensci/plotly")`
-
-For non-interactive mode, ggplot2==2.2.1 also works. 
+Check the Dockerfile.
   
 ## Updates
+08-15-2018
+  - Full application rewrite for speed and simplicity in viewing only 1 dataset at a time.  Table added for differential expression navigation.  Download features still need to be re-implemented.
 
 07-17-2018
   - Moved data loading to the global environment rather than per user session. Added more config options. 
