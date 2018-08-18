@@ -22,6 +22,7 @@ RUN R -e 'install.packages(c("DT"))'
 RUN R -e 'install.packages(c("varhandle"))'
 RUN R -e 'install.packages(c("plyr"))'
 RUN R -e 'install.packages(c("shinyjs"))'
+RUN R -e 'install.packages(c("rlist"))'
 RUN R -e 'devtools::install_github("ropensci/plotly")'
 
 ADD . /app/

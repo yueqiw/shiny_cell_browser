@@ -66,7 +66,7 @@ GetClusterPlot <- function(inputDataList, inputDataIndex, inputWidth, inputHeigh
   #  ) %>% config(displayModeBar = F)
   
   p <- plot_ly(inputDataObj$plot_df, source="plot_cluster", width=inputWidth) %>%
-    add_trace(x=~dim1,y=~dim2,hoverinfo="text",type="scattergl",mode="markers",text=~cluster,key=~cluster,marker=list(size=2*scaleRatio(inputHeight),color=~colorVec),opacity=0.4) %>%
+    add_trace(x=~dim1,y=~dim2,hoverinfo="text",type="scattergl",mode="markers",text=~cluster_description,key=~cluster,marker=list(size=2*scaleRatio(inputHeight),color=~colorVec),opacity=0.4) %>%
     #add_trace(type="scatter",mode="text",textposition="center",x=organoid$title_coords$x_center, y=organoid$title_coords$y_center, text=organoid$title_coords$cluster,font=list(face="bold")) %>%
     add_annotations(x=inputDataObj$title_coords$x_center, y=inputDataObj$title_coords$y_center, text=sprintf("<b>%s</b>",inputDataObj$title_coords$cluster), showarrow=FALSE, font=list(size=11*scaleRatio(inputHeight))) %>%
     layout(
@@ -151,7 +151,7 @@ GetDotPlot <- function(inputDataList, inputDataIndex, inputGeneList, inputWidth)
     p_above <- melt(multiple_genes %>% group_by(cluster) %>% dplyr::summarise_all(funs(PercentAbove)),id.vars=c("cluster"))
     
     #Combine the calculations
-    combined = cbind(avgs,percent_above=100*p_above[,3])
+    combined = cbind(avgs,percent_above=100*p_above[,3]*scaleRatio(inputWidth))
     #Reverse the row order so it plots correctly - from https://stat.ethz.ch/pipermail/r-help/2008-September/175012.html
     rev_combined <- combined[rev(rownames(combined)),]
     #Add the hover text
@@ -176,14 +176,19 @@ GetDotPlot <- function(inputDataList, inputDataIndex, inputGeneList, inputWidth)
       categoryarray = inputDataObj$category_order
     )
     
+    t <- list(
+      size = 12*scaleRatio(inputWidth))
+    
     #colorbar=list(title='Avg. expr.')
-    p <- plot_ly(rev_combined,source="plot_dot",x=~cluster,y=~gene,type="scattergl",mode="markers",width=inputWidth,text=~hover_text,hoverinfo="text",marker=list(symbol="circle",color=~average_expression,size=rev_combined$percent_above*scaleRatio(inputWidth),sizemode="area")) %>%
+    p <- plot_ly(rev_combined,source="plot_dot",x=~cluster,y=~gene,type="scattergl",mode="markers",width=inputWidth,text=~hover_text,hoverinfo="text",marker=list(symbol="circle",size=rev_combined$percent_above,sizemode="area",color=~average_expression)) %>%
       layout(
         title = 'Dot Plot',
         #autosize = TRUE,
+        showlegend = FALSE,
         yaxis = y_ax,
-        xaxis = x_ax
-      ) %>% config(displayModeBar = F)
+        xaxis = x_ax,
+        font = t
+      ) #%>% config(displayModeBar = F)
     
     return(p)
   }

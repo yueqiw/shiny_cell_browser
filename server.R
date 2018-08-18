@@ -5,6 +5,7 @@ library(plyr)
 library(dplyr)
 library(varhandle)
 library(DT)
+library(rlist)
 source("utils.R")
 
 #Start to read in the config file.
@@ -50,6 +51,12 @@ read_data <- function(x) {
   yScaleRatio_clusterPlot = x_domain/y_range
   coords_title = group_by(df_plot,cluster) %>% dplyr::summarize(x_center = mean(dim1), y_center = mean(dim2))
   
+  #Add the full description name on mouse over
+  desc_df = list.flatten(x$cluster_dict)
+  source_abbv = names(desc_df)
+  dest_desc = as.character(list.flatten(x$cluster_dict))
+  df_plot$cluster_description = as.character(mapvalues(df_plot$cluster,from = source_abbv,to=dest_desc))
+  
   #Differential expression data
   differential_expression = read.csv(file=x$diff_ex, header=TRUE, sep=",")
   plot_tab <- differential_expression # %>% select(-c("id")) #%>% select(-c("id","cluster","is_max_pct","p_val","myAUC","power"))
@@ -77,7 +84,8 @@ read_data <- function(x) {
       y_scale_ratio_clusterPlot = yScaleRatio_clusterPlot,
       title_coords = coords_title,
       diff_eq_table = plot_tab,
-      category_order = x$category_order
+      category_order = x$category_order,
+      cluster_dict = x$cluster_dict
       
     ))
 }
@@ -205,8 +213,17 @@ server <- function(input, output, session){
     }
   )
   
+  clusterString <- eventReactive({input$hidden_selected_cluster},{
+    baseString = "all clusters"
+    if(input$hidden_selected_cluster!=""){
+      baseString = organoid()$cluster_dict[input$hidden_selected_cluster]
+    }
+    return(sprintf("Genes differentially expressed in %s",baseString))
+  })
+  
   #TABLE OUTPUT
   #Format the cluster gene table and add links to Addgene and ENSEMBL
+  output$cluster_gene_table_title <- renderText({clusterString()})
   output$cluster_gene_table <- 
     DT::renderDT({
       datatable(organoid()$diff_eq_table,
