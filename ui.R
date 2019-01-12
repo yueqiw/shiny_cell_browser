@@ -5,7 +5,7 @@ library(DT)
 
 ui <- fluidPage(
   shinyjs::useShinyjs(),
-  titlePanel("Shiny Cell Browser"),
+  titlePanel("U Brain Browser"),
   sidebarLayout(fluid=TRUE,
                 sidebarPanel(width=2,
                              selectInput(inputId = "selected_dataset", label = "Dataset", choices = NULL),
@@ -37,6 +37,8 @@ ui <- fluidPage(
                                    )
                           ),
                           fluidRow(width=12,
+                                   textOutput('cluster_gene_table_title'),
+                                   br(),
                                    DTOutput('cluster_gene_table')
                           )
                 )
