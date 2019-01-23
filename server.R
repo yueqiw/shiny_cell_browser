@@ -24,7 +24,7 @@ dataset = datasets[[1]]
 config <- json_file$config
 
 #Now read in the data
-calc_pt_size <- function(n) {30 / n^0.5}
+calc_pt_size <- function(n) {25 / n^0.33}
 read_data <- function(x) {
   # load data and metadata specified by the JSON string.
   # x: individual json string, with [name, file, clusters embedding]

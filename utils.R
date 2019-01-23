@@ -66,7 +66,7 @@ GetClusterPlot <- function(inputDataList, inputDataIndex, inputWidth, inputHeigh
   #  ) %>% config(displayModeBar = F)
   
   p <- plot_ly(inputDataObj$plot_df, source="plot_cluster", width=inputWidth) %>%
-    add_trace(x=~dim1,y=~dim2,hoverinfo="text",type="scattergl",mode="markers",text=~cluster_description,key=~cluster,marker=list(size=2*scaleRatio(inputHeight),color=~colorVec),opacity=0.4) %>%
+    add_trace(x=~dim1,y=~dim2,hoverinfo="text",type="scattergl",mode="markers",text=~cluster_description,key=~cluster,marker=list(size=2*scaleRatio(inputHeight)*inputDataObj$pt_size,color=~colorVec),opacity=0.5) %>%
     #add_trace(type="scatter",mode="text",textposition="center",x=organoid$title_coords$x_center, y=organoid$title_coords$y_center, text=organoid$title_coords$cluster,font=list(face="bold")) %>%
     add_annotations(x=inputDataObj$title_coords$x_center, y=inputDataObj$title_coords$y_center, text=sprintf("<b>%s</b>",inputDataObj$title_coords$cluster), showarrow=FALSE, font=list(size=11*scaleRatio(inputHeight))) %>%
     layout(
@@ -114,7 +114,7 @@ GetExpressionPlot <- function(inputDataList, inputDataIndex, inputGene, inputWid
     )
     
     single_gene <- GetPlotData(inputDataObj, inputGene)
-    p <- plot_ly(single_gene,source="plot_expression",x=~dim1,y=~dim2,type="scattergl",width=inputWidth,mode="markers", text=~gene, color=~gene,marker=list(size=2*scaleRatio(inputHeight)),hoverinfo="text",name=inputGene,colors=c("grey90", "red")) %>%
+    p <- plot_ly(single_gene,source="plot_expression",x=~dim1,y=~dim2,type="scattergl",width=inputWidth,mode="markers", text=~gene, color=~gene,marker=list(size=2*scaleRatio(inputHeight)*inputDataObj$pt_size),hoverinfo="text",name=inputGene,colors=c("grey90", "red")) %>%
       layout(
         #autosize = TRUE,
         title=inputGene,
