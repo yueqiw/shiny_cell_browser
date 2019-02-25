@@ -84,7 +84,6 @@ read_data <- function(x) {
       y_scale_ratio_clusterPlot = yScaleRatio_clusterPlot,
       title_coords = coords_title,
       diff_eq_table = plot_tab,
-      category_order = x$category_order,
       cluster_dict = x$cluster_dict
       
     ))
