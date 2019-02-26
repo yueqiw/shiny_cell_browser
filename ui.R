@@ -3,9 +3,12 @@ library(shinyjs)
 library(plotly)
 library(DT)
 
+json_file <- rjson::fromJSON(file = './data/config.json')
+json_config <- json_file$config
+
 ui <- fluidPage(
   shinyjs::useShinyjs(),
-  titlePanel("U Brain Browser"),
+  titlePanel(json_config$ui_title),
   sidebarLayout(fluid=TRUE,
                 sidebarPanel(width=2,
                              selectInput(inputId = "selected_dataset", label = "Dataset", choices = NULL),

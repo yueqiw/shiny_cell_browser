@@ -61,13 +61,15 @@ read_data <- function(x) {
   differential_expression = read.csv(file=x$diff_ex, header=TRUE, sep=",")
   plot_tab <- differential_expression # %>% select(-c("id")) #%>% select(-c("id","cluster","is_max_pct","p_val","myAUC","power"))
   
-  seurat_data2 <- SetAllIdent(seurat_data,  x$diff_eq_cluster)
-  assign_clust2 <- as.data.frame(GetClusters(seurat_data2))
-  merged = dplyr::left_join(assign_clust,assign_clust2,by="cell.name")
-  keyMap = distinct(merged %>% select(cluster.x,cluster.y))
-  
-  plot_tab$cluster = as.character(mapvalues(plot_tab$cluster,from = as.integer(keyMap$cluster.y),to=as.character(keyMap$cluster.x)))
-  
+  if (x$cluster != x$diff_eq_cluster) {
+      seurat_data2 <- SetAllIdent(seurat_data,  x$diff_eq_cluster)
+      assign_clust2 <- as.data.frame(GetClusters(seurat_data2))
+      merged = dplyr::left_join(assign_clust,assign_clust2,by="cell.name")
+      keyMap = distinct(merged %>% select(cluster.x,cluster.y))
+      
+      plot_tab$cluster = as.character(mapvalues(plot_tab$cluster,from = as.integer(keyMap$cluster.y),to=as.character(keyMap$cluster.x)))
+  }
+
   return(
     list(
       name = x$name,
@@ -157,7 +159,9 @@ server <- function(input, output, session){
       return(organoid()$diff_eq_table)
     }
     else{
+      print(input$hidden_selected_cluster)
       subTable = filter(organoid()$diff_eq_table,cluster==input$hidden_selected_cluster)
+      print(subTable)
       return(subTable)
     }
   })
@@ -222,6 +226,10 @@ server <- function(input, output, session){
   
   #TABLE OUTPUT
   #Format the cluster gene table and add links to Addgene and ENSEMBL
+
+  decimal_columns <- c('avg_logFC','p_val','p_val_adj', 'avg_diff')
+  important_columns <- c('gene', 'cluster_name', 'p_val')
+
   output$cluster_gene_table_title <- renderText({clusterString()})
   output$cluster_gene_table <- 
     DT::renderDT({
@@ -232,22 +240,36 @@ server <- function(input, output, session){
                   list(
                     columnDefs=
                       list(
-                        list(responsivePriority=1,targets=c(0,7,9)),
-                        list(responsivePriority=2,targets=c(3,4,5)),
+                        list(responsivePriority=1,targets=which(colnames(organoid()$diff_eq_table) %in% important_columns)),
                         list(
                           render= JS(
                             "function(data, type, row, meta) {",
                             "return type === 'display'?",
                             "'<a href=\"https://www.genecards.org/cgi-bin/carddisp.pl?gene=' + data + '\">' + data + '</a>' : data;",
                             "}"), targets=c(0)),
-                        list(
+                        {
+                          if ('id' %in% colnames(organoid()$diff_eq_table)) {
+                            list(
                           render= JS(
                             "function(data, type, row, meta) {",
                             "return type === 'display'?",
                             "'<a href=\"http://uswest.ensembl.org/Homo_sapiens/Gene/Summary?g=' + data + '\">' + data + '</a>' : data;",
                             "}"), targets=c(1))
+                          } else {
+                            list()
+                          }
+                        }
+                        
                       )
-                  )) %>% formatPercentage(c('pct.1','pct.2'), 0) %>% formatSignif(c('avg_logFC','p_val','p_val_adj'),3)
+                  )
+                ) %>% 
+                {
+                  if ('pct.1' %in% colnames(organoid()$diff_eq_table))
+                    formatPercentage(c('pct.1','pct.2'), 0)
+                  else 
+                    .
+                } %>% 
+                formatSignif(decimal_columns[decimal_columns %in% colnames(organoid()$diff_eq_table)], 3)  
     },
     server=TRUE
     )
