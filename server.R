@@ -70,6 +70,8 @@ read_data <- function(x) {
       plot_tab$cluster = as.character(mapvalues(plot_tab$cluster,from = as.integer(keyMap$cluster.y),to=as.character(keyMap$cluster.x)))
   }
 
+  
+
   return(
     list(
       name = x$name,
@@ -159,9 +161,7 @@ server <- function(input, output, session){
       return(organoid()$diff_eq_table)
     }
     else{
-      print(input$hidden_selected_cluster)
       subTable = filter(organoid()$diff_eq_table,cluster==input$hidden_selected_cluster)
-      print(subTable)
       return(subTable)
     }
   })
@@ -240,25 +240,25 @@ server <- function(input, output, session){
                   list(
                     columnDefs=
                       list(
-                        list(responsivePriority=1,targets=which(colnames(organoid()$diff_eq_table) %in% important_columns)),
+                        list(responsivePriority=1,targets=important_columns),
                         list(
                           render= JS(
                             "function(data, type, row, meta) {",
                             "return type === 'display'?",
                             "'<a href=\"https://www.genecards.org/cgi-bin/carddisp.pl?gene=' + data + '\">' + data + '</a>' : data;",
-                            "}"), targets=c(0)),
-                        {
-                          if ('id' %in% colnames(organoid()$diff_eq_table)) {
-                            list(
-                          render= JS(
-                            "function(data, type, row, meta) {",
-                            "return type === 'display'?",
-                            "'<a href=\"http://uswest.ensembl.org/Homo_sapiens/Gene/Summary?g=' + data + '\">' + data + '</a>' : data;",
-                            "}"), targets=c(1))
-                          } else {
-                            list()
-                          }
-                        }
+                            "}"), targets=c(0))#,
+                        #{
+                          # if ('id' %in% colnames(organoid()$diff_eq_table)) {
+                          #   list(
+                          # render= JS(
+                          #   "function(data, type, row, meta) {",
+                          #   "return type === 'display'?",
+                          #   "'<a href=\"http://uswest.ensembl.org/Homo_sapiens/Gene/Summary?g=' + data + '\">' + data + '</a>' : data;",
+                          #   "}"), targets=c(1))
+                          # } else {
+                          #   list()
+                          # }
+                        #}
                         
                       )
                   )
