@@ -263,12 +263,6 @@ server <- function(input, output, session){
                       )
                   )
                 ) %>% 
-                {
-                  if ('pct.1' %in% colnames(organoid()$diff_eq_table))
-                    formatPercentage(c('pct.1','pct.2'), 0)
-                  else 
-                    .
-                } %>% 
                 formatSignif(decimal_columns[decimal_columns %in% colnames(organoid()$diff_eq_table)], 3)  
     },
     server=TRUE
