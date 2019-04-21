@@ -147,6 +147,15 @@ server <- function(input, output, session){
                  updateTextInput(session, "hidden_selected_gene", value = input$selected_gene)
                },
                ignoreNULL=TRUE, ignoreInit=TRUE)
+
+  #Update expression plot on table row click 
+  observeEvent({input$cluster_gene_table_rows_selected},
+              {
+                rowid <- input$cluster_gene_table_rows_selected 
+                gene_selected <- current_table()[rowid, 'gene']
+                updateTextInput(session, "hidden_selected_gene", value = gene_selected)
+              },
+              ignoreNULL=TRUE, ignoreInit=TRUE)
   
   #Get plot window width using the cluster plot as a reference
   plot_window_width = eventReactive({session$clientData$output_cluster_plot_width},{
@@ -159,7 +168,10 @@ server <- function(input, output, session){
   })
   
   #Generate the current table based on the current hidden selected cluster
-  current_table <- eventReactive({input$hidden_selected_cluster},{
+  current_table <- eventReactive({
+    input$hidden_selected_cluster
+    current_dataset_index()
+    },{
     if(as.character(input$hidden_selected_cluster)==""){
       return(organoid()$diff_eq_table)
     }
@@ -182,6 +194,11 @@ server <- function(input, output, session){
   
   #Set the hidden_selected_cluster field to nothing when the reset button is clicked
   observeEvent(eventExpr = {input$reset_table}, handlerExpr = {
+    updateTextInput(session,"hidden_selected_cluster",value="")
+    })
+
+  #Set the hidden_selected_cluster field to nothing when the the dataset is changed 
+  observeEvent(eventExpr = {current_dataset_index()}, handlerExpr = {
     updateTextInput(session,"hidden_selected_cluster",value="")
     })
   
@@ -239,6 +256,7 @@ server <- function(input, output, session){
       datatable(organoid()$diff_eq_table,
                 rownames=FALSE,
                 extensions=c('Responsive'),
+                selection='single',
                 options=
                   list(
                     columnDefs=
