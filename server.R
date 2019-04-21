@@ -32,6 +32,9 @@ read_data <- function(x) {
   seurat_data <- SetAllIdent(seurat_data,  x$cluster)
   ncells <- length(seurat_data@cell.names)
   pt_size <- calc_pt_size(ncells)
+  if (!is.null(x$pt_size)) {
+    pt_size <- x$pt_size
+  }
   colors <- seurat_data@misc[[sprintf("%s_colors",  x$cluster)]]
   if (is.null(colors)) {
     set.seed(2)
