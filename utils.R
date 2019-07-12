@@ -67,22 +67,22 @@ GetClusterPlot <- function(inputDataList, inputDataIndex, inputWidth, inputHeigh
 
   p <- plot_ly(inputDataObj$plot_df, source = "plot_cluster", width = inputWidth, height = inputHeight) %>%
     add_trace(
-      x = ~dim1, 
-      y = ~dim2, 
-      hoverinfo = "text", 
-      type = "scattergl", 
-      mode = "markers", 
-      text = ~cluster_description, 
-      key = ~cluster, 
-      marker = list(size = 2 * scaleRatio(inputWidth) * inputDataObj$pt_size, color = ~colorVec), 
+      x = ~dim1,
+      y = ~dim2,
+      hoverinfo = "text",
+      type = "scattergl",
+      mode = "markers",
+      text = ~cluster_description,
+      key = ~cluster,
+      marker = list(size = 2 * scaleRatio(inputWidth) * inputDataObj$pt_size, color = ~colorVec),
       opacity = 0.5
     ) %>%
     #add_trace(type="scatter",mode="text",textposition="center",x=organoid$title_coords$x_center, y=organoid$title_coords$y_center, text=organoid$title_coords$cluster,font=list(face="bold")) %>%
     add_annotations(
-      x = inputDataObj$title_coords$x_center, 
-      y = inputDataObj$title_coords$y_center, 
-      text = sprintf("<b>%s</b>", inputDataObj$title_coords$cluster), 
-      showarrow = FALSE, 
+      x = inputDataObj$title_coords$x_center,
+      y = inputDataObj$title_coords$y_center,
+      text = sprintf("<b>%s</b>", inputDataObj$title_coords$cluster),
+      showarrow = FALSE,
       font = list(size = 11 * scaleRatio(inputWidth) * inputDataObj$font_scale)
     ) %>%
     layout(
@@ -90,8 +90,8 @@ GetClusterPlot <- function(inputDataList, inputDataIndex, inputWidth, inputHeigh
       title = inputDataObj$name,
       xaxis = x_ax,
       yaxis = y_ax
-    ) %>% 
-    hide_colorbar() %>% 
+    ) %>%
+    hide_colorbar() %>%
     config(displayModeBar = F)
 
   return(p)
@@ -132,13 +132,30 @@ GetExpressionPlot <- function(inputDataList, inputDataIndex, inputGene, inputWid
     )
 
     single_gene <- GetPlotData(inputDataObj, inputGene)
-    p <- plot_ly(single_gene, source = "plot_expression", x = ~dim1, y = ~dim2, type = "scattergl", width = inputWidth, height = inputHeight, mode = "markers", text = ~gene, color = ~gene, marker = list(size = 2 * scaleRatio(inputWidth) * inputDataObj$pt_size), hoverinfo = "text", name = inputGene, colors = c("grey90", "red")) %>%
-      layout(
+    p <- plot_ly(
+      single_gene, 
+      source = "plot_expression", 
+      x = ~dim1, 
+      y = ~dim2, 
+      type = "scattergl", 
+      width = inputWidth, 
+      height = inputHeight, 
+      mode = "markers", 
+      text = ~gene,
+      color = ~gene, 
+      marker = list(size = 2 * scaleRatio(inputWidth) * inputDataObj$pt_size), 
+      hoverinfo = "text", 
+      name = inputGene, 
+      colors = c("grey90", "red")
+    ) %>%
+    layout(
     #autosize = TRUE,
-        title = inputGene,
-        xaxis = x_ax,
-        yaxis = y_ax
-      ) %>% hide_colorbar() %>% config(displayModeBar = F)
+      title = inputGene,
+      xaxis = x_ax,
+      yaxis = y_ax
+    ) %>% 
+    hide_colorbar() %>% 
+    config(displayModeBar = F)
 
     return(p)
   }
@@ -197,15 +214,27 @@ GetDotPlot <- function(inputDataList, inputDataIndex, inputGeneList, inputWidth,
       size = 12 * scaleRatio(inputWidth))
 
     #colorbar=list(title='Avg. expr.')
-    p <- plot_ly(rev_combined, source = "plot_dot", x = ~cluster, y = ~gene, type = "scattergl", mode = "markers", width = inputWidth, height = inputHeight, text = ~hover_text, hoverinfo = "text", marker = list(symbol = "circle", size = rev_combined$percent_above, sizemode = "area", color = ~average_expression)) %>%
-      layout(
-        title = 'Dot Plot',
-    #autosize = TRUE,
-        showlegend = FALSE,
-        yaxis = y_ax,
-        xaxis = x_ax,
-        font = t
-      ) #%>% config(displayModeBar = F)
+    p <- plot_ly(
+      rev_combined, 
+      source = "plot_dot", 
+      x = ~cluster, 
+      y = ~gene, 
+      type = "scattergl", 
+      mode = "markers", 
+      width = inputWidth, 
+      height = inputHeight, 
+      text = ~hover_text, 
+      hoverinfo = "text", 
+      marker = list(symbol = "circle", size = rev_combined$percent_above, sizemode = "area", color = ~average_expression)
+    ) %>%
+    layout(
+      title = 'Dot Plot',
+  #autosize = TRUE,
+      showlegend = FALSE,
+      yaxis = y_ax,
+      xaxis = x_ax,
+      font = t
+    ) #%>% config(displayModeBar = F)
 
     return(p)
   }
