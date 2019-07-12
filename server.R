@@ -167,9 +167,9 @@ server <- function(input, output, session){
     return(session$clientData$output_cluster_plot_width)
   })
   
-  #Get plot window height using the cluster plot as a reference
-  plot_window_height = eventReactive({session$clientData$output_cluster_plot_height},{
-    return(session$clientData$output_cluster_plot_height)
+  #Get plot window height using the cluster plot as a reference (force height = width)
+  plot_window_height = eventReactive({session$clientData$output_cluster_plot_width},{
+    return(session$clientData$output_cluster_plot_width)
   })
   
   #Generate the current table based on the current hidden selected cluster
@@ -237,7 +237,7 @@ server <- function(input, output, session){
   )
   output$dot_plot <- renderPlotly(
     {
-      GetDotPlot(data_list,current_dataset_index(),current_gene_list(),plot_window_width())
+      GetDotPlot(data_list,current_dataset_index(),current_gene_list(),plot_window_width(),plot_window_height())
     }
   )
   

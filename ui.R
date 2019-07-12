@@ -30,13 +30,13 @@ ui <- fluidPage(
                 mainPanel(fluid=TRUE,width=10,
                           fluidRow(width=12,
                                    column(width=4,
-                                          plotlyOutput(outputId = "cluster_plot",width="100%")
+                                          plotlyOutput(outputId = "cluster_plot",width="100%", height="auto")
                                    ),
                                    column(width=4,
-                                          plotlyOutput(outputId = "expression_plot",width="100%")
+                                          plotlyOutput(outputId = "expression_plot",width="100%", height="auto")
                                    ),
                                    column(width=4,
-                                          plotlyOutput(outputId = "dot_plot",width="100%")
+                                          plotlyOutput(outputId = "dot_plot",width="100%", height="auto")
                                    )
                           ),
                           fluidRow(width=12,
