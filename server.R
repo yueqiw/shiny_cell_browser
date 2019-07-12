@@ -35,6 +35,10 @@ read_data <- function(x) {
   if (!is.null(x$pt_size)) {
     pt_size <- x$pt_size
   }
+  font_scale <- 1
+  if (!is.null(x$font_scale)) {
+    font_scale <- x$font_scale
+  }
   colors <- seurat_data@misc[[sprintf("%s_colors",  x$cluster)]]
   if (is.null(colors)) {
     set.seed(2)
@@ -81,6 +85,7 @@ read_data <- function(x) {
       seurat_data = seurat_data,
       ncells = ncells,
       pt_size = pt_size,
+      font_scale = font_scale, 
       embedding = x$embedding,
       colors = colors,
       genes = genes,
