@@ -33,7 +33,7 @@ SetAllIdent <- function(object, ids) {
 }
 
 GetClusters <- function(object) {
-  clusters <- data.frame(cell.name = names(object@active.ident), cluster = object@active.ident)
+  clusters <- data.frame(cell.name = names(object@active.ident), cluster = as.character(object@active.ident))
   rownames(clusters) <- NULL
   clusters$cell.name <- as.character(clusters$cell.name)
   return(clusters)
@@ -98,7 +98,8 @@ read_data <- function(x) {
     merged = dplyr::left_join(assign_clust, assign_clust2, by = "cell.name")
     keyMap = distinct(merged %>% select(cluster.x, cluster.y))
 
-    plot_tab$cluster = as.character(mapvalues(plot_tab$cluster, from = as.integer(keyMap$cluster.y), to = as.character(keyMap$cluster.x)))
+    plot_tab$cluster = as.character(mapvalues(plot_tab$cluster, from = as.character(keyMap$cluster.y), to = as.character(keyMap$cluster.x)))
+    seurat_data <- SetAllIdent(seurat_data, x$cluster)
   }
 
   return(
