@@ -89,10 +89,10 @@ read_data <- function(x) {
   df_plot$cluster_description = as.character(mapvalues(df_plot$cluster, from = source_abbv, to = dest_desc))
 
   #Differential expression data
-  differential_expression = read.csv(file = x$diff_ex, header = TRUE, sep = ",")
+  differential_expression = read.csv(file = x$diff_ex_file, header = TRUE, sep = ",")
   plot_tab <- differential_expression # %>% select(-c("id")) #%>% select(-c("id","cluster","is_max_pct","p_val","myAUC","power"))
 
-  if (x$cluster != x$diff_ex_cluster) {
+  if (!is.null(x$diff_ex_cluster) && x$cluster != x$diff_ex_cluster) {
     seurat_data2 <- SetAllIdent(seurat_data, x$diff_ex_cluster)
     assign_clust2 <- as.data.frame(GetClusters(seurat_data2))
     merged = dplyr::left_join(assign_clust, assign_clust2, by = "cell.name")
@@ -100,8 +100,6 @@ read_data <- function(x) {
 
     plot_tab$cluster = as.character(mapvalues(plot_tab$cluster, from = as.integer(keyMap$cluster.y), to = as.character(keyMap$cluster.x)))
   }
-
-
 
   return(
     list(
