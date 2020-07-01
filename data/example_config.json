@@ -1,37 +1,35 @@
 {
     "data": [
         {
-            "name": "My favorite sample",
+            "name": "My 1st sample",
             "file": "path/to/seurat/data.rds",
-            "clusters": "res.1",
-            "embedding": "umap"
+            "cluster": "res.1",
+            "embedding": "umap",
+            "diff_ex_cluster": "res.1", 
+	        "diff_ex_file": "path/to/differential_expression/markers.csv"
         },
         {
-            "name": "My 2nd favorite sample",
-            "file": "path/to/seurat/data.rds",
-            "clusters": "res.1",
-            "embedding": "tsne"
-        },
-        {
-            "name": "Sample 3",
-            "file": "path/to/seurat/data.rds",
-            "clusters": "res.1.2",
-            "embedding": "umap"
-        },
-        {
-            "name": "Sample 4",
-            "file": "path/to/seurat/data.rds",
-            "clusters": "res.0.8",
-            "embedding": "tsne"
+            "name": "My 2nd sample",
+            "file": "path/to/seurat/data2.rds",
+            "cluster": "res.1_rename1",
+            "embedding": "tsne",
+            "diff_ex_cluster": "res.1", 
+            "diff_ex_file": "path/to/differential_expression/markers.csv",
+
+            "cluster_name_mapping": {
+                "C1": "Neurons",
+                "C2": "Astrocytes",
+                "C3": "Neural Progenitors",
+                "Note": "cluster_name_mapping is optional"
+            },
+            "pt_size": 2,
+            "font_scale": 0.75
         }
     ],
     "config": {
-        "startup_data1": 1,
-        "startup_data2": "none",
-        "startup_data3": "none",
-        "default_layout": "horizontal",
-        "default_viz_mode": "interactive",
-        "default_single_gene": "none"
+        "ui_title": "Single Cell Browser",
+        "title_link_text": "Optional subtitle (e.g. your lab)",
+        "title_link_url": "http://optional-link-to-your-lab.com"
     }
 
 }
