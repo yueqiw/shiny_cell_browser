@@ -78,6 +78,11 @@ read_data <- function(x) {
   coords_title = group_by(df_plot, cluster) %>% dplyr::summarize(x_center = mean(dim1), y_center = mean(dim2))
 
   #Add the full description name on mouse over
+  if (is.null(x$cluster_dict)) {
+    cluster_names <- data@active.ident %>% levels()
+    names(cluster_names) <- cluster_names
+    x$cluster_dict <- as.list(cluster_names)
+  }
   desc_df = list.flatten(x$cluster_dict)
   source_abbv = names(desc_df)
   dest_desc = as.character(list.flatten(x$cluster_dict))
