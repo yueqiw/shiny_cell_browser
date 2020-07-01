@@ -38,7 +38,7 @@ Example `config.json` file:
             "cluster": "res.1",
             "embedding": "umap",
             "diff_ex_cluster": "res.1", 
-	        "diff_ex_file": "path/to/differential_expression/markers.csv"
+	    "diff_ex_file": "path/to/differential_expression/markers.csv"
         },
         {
             "name": "My 2nd sample",
