@@ -26,12 +26,30 @@ config <- json_file$config
 
 #Now read in the data
 calc_pt_size <- function(n) { 25 / n ^ 0.33 }
+
+SetAllIdent <- function(object, ids) {
+  Idents(object) <- ids
+  return(object)
+}
+
+GetClusters <- function(object) {
+  clusters <- data.frame(cell.name = names(object@active.ident), cluster = object@active.ident)
+  rownames(clusters) <- NULL
+  clusters$cell.name <- as.character(clusters$cell.name)
+  return(clusters)
+}
+
+GetDimReduction <- function(object, reduction.type = "umap", slot = "cell.embeddings") {
+  reduction <- object[[reduction.type]]
+  return(eval(expr = parse(text = paste0("reduction", "@", slot))))
+}
+
 read_data <- function(x) {
   # load data and metadata specified by the JSON string.
   # x: individual json string, with [name, file, clusters embedding]
   seurat_data <- readRDS(x$file)
   seurat_data <- SetAllIdent(seurat_data, x$cluster)
-  ncells <- length(seurat_data@cell.names)
+  ncells <- length(colnames(seurat_data))
   pt_size <- calc_pt_size(ncells)
   if (!is.null(x$pt_size)) {
     pt_size <- x$pt_size
@@ -43,9 +61,9 @@ read_data <- function(x) {
   colors <- seurat_data@misc[[sprintf("%s_colors", x$cluster)]]
   if (is.null(colors)) {
     set.seed(2)
-    colors <- sample(rainbow(n_distinct(seurat_data@ident)))
+    colors <- sample(rainbow(n_distinct(seurat_data@active.ident)))
   }
-  genes <- sort(rownames(seurat_data@data))
+  genes <- sort(rownames(GetAssayData(seurat_data)))
 
   #Parser additions
   full_embedding <- as.data.frame(GetDimReduction(seurat_data, reduction.type = x$embedding, slot = "cell.embeddings"))
@@ -273,7 +291,7 @@ server <- function(input, output, session) {
                       list(
                         list(responsivePriority = 1, targets = important_columns),
                         list(
-                          render = JS(
+                          render = DT::JS(
                             "function(data, type, row, meta) {",
                             "return type === 'display'?",
                             "'<a href=\"https://www.genecards.org/cgi-bin/carddisp.pl?gene=' + data + '\">' + data + '</a>' : data;",

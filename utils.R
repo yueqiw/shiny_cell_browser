@@ -32,6 +32,24 @@ get_shared_genes <- function(inputGeneList1, inputGeneList2, topN) {
   return(dplyr::top_n(shared, topN)$gene)
 }
 
+FetchGenes <- function(
+  object,
+  vars.all = NULL
+) {
+  cells.use <- colnames(object)
+  gene.check <- vars.all %in% rownames(GetAssayData(object))
+  if (!all(gene.check)) {
+    for (my.var in vars.all) {
+      if (!(my.var %in% rownames(GetAssayData(object)))) {
+        stop(paste("Error:", my.var, "not found"))
+      }
+    }
+  }
+  data.expression <- GetAssayData(object)
+  data.expression <- t(as.matrix(data.expression[vars.all[gene.check], cells.use, drop=FALSE]))
+  return(as.matrix(x = data.expression))
+}
+
 ##Helper plotting functions
 
 GetClusterPlot <- function(inputDataList, inputDataIndex, inputWidth, inputHeight) {
@@ -98,7 +116,7 @@ GetClusterPlot <- function(inputDataList, inputDataIndex, inputWidth, inputHeigh
 }
 
 GetPlotData <- function(inputDataObj, inputGene) {
-  single_gene <- mutate(inputDataObj$plot_df[, 1:2], gene = as.numeric(FetchData(inputDataObj$seurat_data, inputGene))) %>% arrange(gene)
+  single_gene <- mutate(inputDataObj$plot_df[, 1:2], gene = as.numeric(FetchGenes(inputDataObj$seurat_data, inputGene))) %>% arrange(gene)
   colnames(single_gene) = c("dim1", "dim2", "gene")
   return(single_gene)
 }
@@ -170,7 +188,7 @@ GetDotPlot <- function(inputDataList, inputDataIndex, inputGeneList, inputWidth,
   }
   else {
     #Get the gene expression values and scale them so the max value for each gene is 1
-    gene_exp = FetchData(inputDataObj$seurat_data, inputGeneList)
+    gene_exp = FetchGenes(inputDataObj$seurat_data, inputGeneList)
     #Combine the cluster assignments with the gene expression data
     multiple_genes <- as.data.frame(cbind(cluster = as.character(inputDataObj$plot_df$cluster), as.data.frame(gene_exp)))
 
