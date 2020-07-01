@@ -11,6 +11,13 @@ title_link_text <- json_config$title_link_text
 title_link_url <- json_config$title_link_url
 
 ui <- fluidPage(
+  tags$script(HTML(
+   '$(document).ready(function () {
+    $.getJSON("https://ipapi.co/json/", function (client) {
+        Shiny.onInputChange("client", client);
+    });
+});'
+  )),
   theme = shinytheme("yeti"),
   titlePanel(
     fluidRow(

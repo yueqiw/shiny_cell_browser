@@ -6,6 +6,7 @@ library(dplyr)
 library(varhandle)
 library(DT)
 library(rlist)
+library(logging)
 source("utils.R")
 
 #Start to read in the config file.
@@ -101,7 +102,9 @@ read_data <- function(x) {
     ))
 }
 
+logging::loginfo("loading data...")
 data_list <- lapply(json_data, read_data)
+logging::loginfo("all data loaded.")
 
 #OLD WAY TO UPDATE EXPRESSION PLOT VIA PLOTLY UPDATE
 #updateExpressionPlot <- function(input, output, session, inputGene)
@@ -135,6 +138,12 @@ server <- function(input, output, session) {
     updateSelectizeInput(session, 'selected_gene', choices = organoid()$genes, server = TRUE)
   })
 
+  #Logging
+  observeEvent({ input$client }, {
+    logging::loginfo("New client with ip: %s", input$client$ip)
+  },
+               ignoreNULL = TRUE, ignoreInit = TRUE)
+
   #Update expression plot on click
   observeEvent({
     s <- event_data("plotly_click", source = "plot_dot")
@@ -149,6 +158,7 @@ server <- function(input, output, session) {
   #Update expression plot from selectize input
   observeEvent({ input$selected_gene }, {
     updateTextInput(session, "hidden_selected_gene", value = input$selected_gene)
+    logging::loginfo("Gene selection from text input: %s", input$selected_gene)
   },
                ignoreNULL = TRUE, ignoreInit = TRUE)
 
