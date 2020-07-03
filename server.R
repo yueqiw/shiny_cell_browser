@@ -79,7 +79,7 @@ read_data <- function(x) {
 
   #Add the full description name on mouse over
   if (is.null(x$cluster_name_mapping)) {
-    cluster_names <- data@active.ident %>% levels()
+    cluster_names <- seurat_data@active.ident %>% levels()
     names(cluster_names) <- cluster_names
     x$cluster_name_mapping <- as.list(cluster_names)
   }
