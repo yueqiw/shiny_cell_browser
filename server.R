@@ -61,7 +61,7 @@ read_data <- function(x) {
 
   #Add the full description name on mouse over
   if (is.null(x$cluster_name_mapping)) {
-    cluster_names <- data@ident %>% levels()
+    cluster_names <- seurat_data@ident %>% levels()
     names(cluster_names) <- cluster_names
     x$cluster_name_mapping <- as.list(cluster_names)
   }
@@ -81,6 +81,7 @@ read_data <- function(x) {
     keyMap = distinct(merged %>% select(cluster.x, cluster.y))
 
     plot_tab$cluster = as.character(mapvalues(plot_tab$cluster, from = as.integer(keyMap$cluster.y), to = as.character(keyMap$cluster.x)))
+    seurat_data2 <- SetAllIdent(seurat_data, x$cluster)
   }
 
 
@@ -263,7 +264,7 @@ server <- function(input, output, session) {
   #Format the cluster gene table and add links to Addgene and ENSEMBL
 
   decimal_columns <- c('avg_logFC', 'p_val', 'p_val_adj', 'avg_diff')
-  important_columns <- c('gene', 'cluster_name', 'p_val')
+  important_columns <- c('gene', 'cluster', 'p_val')
 
   output$cluster_gene_table_title <- renderText({ clusterString() })
   output$cluster_gene_table <-
