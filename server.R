@@ -6,6 +6,7 @@ library(dplyr)
 library(varhandle)
 library(DT)
 library(rlist)
+library(logging)
 source("utils.R")
 
 #Start to read in the config file.
@@ -59,17 +60,22 @@ read_data <- function(x) {
   coords_title = group_by(df_plot, cluster) %>% dplyr::summarize(x_center = mean(dim1), y_center = mean(dim2))
 
   #Add the full description name on mouse over
-  desc_df = list.flatten(x$cluster_dict)
+  if (is.null(x$cluster_name_mapping)) {
+    cluster_names <- data@ident %>% levels()
+    names(cluster_names) <- cluster_names
+    x$cluster_name_mapping <- as.list(cluster_names)
+  }
+  desc_df = list.flatten(x$cluster_name_mapping)
   source_abbv = names(desc_df)
-  dest_desc = as.character(list.flatten(x$cluster_dict))
+  dest_desc = as.character(list.flatten(x$cluster_name_mapping))
   df_plot$cluster_description = as.character(mapvalues(df_plot$cluster, from = source_abbv, to = dest_desc))
 
   #Differential expression data
-  differential_expression = read.csv(file = x$diff_ex, header = TRUE, sep = ",")
+  differential_expression = read.csv(file = x$diff_ex_file, header = TRUE, sep = ",")
   plot_tab <- differential_expression # %>% select(-c("id")) #%>% select(-c("id","cluster","is_max_pct","p_val","myAUC","power"))
 
-  if (x$cluster != x$diff_eq_cluster) {
-    seurat_data2 <- SetAllIdent(seurat_data, x$diff_eq_cluster)
+  if (!is.null(x$diff_ex_cluster) && x$cluster != x$diff_ex_cluster) {
+    seurat_data2 <- SetAllIdent(seurat_data, x$diff_ex_cluster)
     assign_clust2 <- as.data.frame(GetClusters(seurat_data2))
     merged = dplyr::left_join(assign_clust, assign_clust2, by = "cell.name")
     keyMap = distinct(merged %>% select(cluster.x, cluster.y))
@@ -96,7 +102,7 @@ read_data <- function(x) {
       y_scale_ratio_clusterPlot = yScaleRatio_clusterPlot,
       title_coords = coords_title,
       diff_eq_table = plot_tab,
-      cluster_dict = x$cluster_dict
+      cluster_name_mapping = x$cluster_name_mapping
 
     ))
 }
@@ -137,6 +143,12 @@ server <- function(input, output, session) {
     updateSelectizeInput(session, 'selected_gene', choices = organoid()$genes, server = TRUE)
   })
 
+  #Logging
+  observeEvent({ input$client }, {
+    logging::loginfo("New client with ip: %s", input$client$ip)
+  },
+               ignoreNULL = TRUE, ignoreInit = TRUE)
+
   #Update expression plot on click
   observeEvent({
     s <- event_data("plotly_click", source = "plot_dot")
@@ -151,6 +163,7 @@ server <- function(input, output, session) {
   #Update expression plot from selectize input
   observeEvent({ input$selected_gene }, {
     updateTextInput(session, "hidden_selected_gene", value = input$selected_gene)
+    logging::loginfo("Gene selection from text input: %s", input$selected_gene)
   },
                ignoreNULL = TRUE, ignoreInit = TRUE)
 
@@ -241,7 +254,7 @@ server <- function(input, output, session) {
   clusterString <- eventReactive({ input$hidden_selected_cluster }, {
     baseString = "all clusters"
     if (input$hidden_selected_cluster != "") {
-      baseString = organoid()$cluster_dict[input$hidden_selected_cluster]
+      baseString = organoid()$cluster_name_mapping[input$hidden_selected_cluster]
     }
     return(sprintf("Genes differentially expressed in %s", baseString))
   })
