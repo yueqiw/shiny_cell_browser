@@ -101,7 +101,9 @@ read_data <- function(x) {
     ))
 }
 
+logging::loginfo("loading data...")
 data_list <- lapply(json_data, read_data)
+logging::loginfo("all data loaded.")
 
 #OLD WAY TO UPDATE EXPRESSION PLOT VIA PLOTLY UPDATE
 #updateExpressionPlot <- function(input, output, session, inputGene)
