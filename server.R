@@ -18,8 +18,8 @@ dataset_selector <- as.list(c(datasets))
 names(dataset_selector) <- c(dataset_names)
 
 #Use only the first dataset in the config file
-dataset_name = dataset_names[[1]]
-dataset = datasets[[1]]
+# dataset_name = dataset_names[[1]]
+# dataset = datasets[[1]]
 
 #Read the config data
 config <- json_file$config
@@ -108,9 +108,13 @@ read_data <- function(x) {
     ))
 }
 
+# code to load all data (may slow down app startup)
+# data_list <- lapply(json_data, read_data)
+
 logging::loginfo("loading data...")
-data_list <- lapply(json_data, read_data)
-logging::loginfo("all data loaded.")
+data_list <- rep(list(NULL), length(json_data))
+data_list[[1]] <- read_data(json_data[[1]])
+logging::loginfo("loaded dataset #1.")
 
 #OLD WAY TO UPDATE EXPRESSION PLOT VIA PLOTLY UPDATE
 #updateExpressionPlot <- function(input, output, session, inputGene)
@@ -133,6 +137,15 @@ server <- function(input, output, session) {
     current_index <- dataset_selector[[input$selected_dataset]]
     return(current_index)
   }, ignoreInit = TRUE, ignoreNULL = TRUE)
+
+  observeEvent({ current_dataset_index() }, {
+    current_index <- current_dataset_index()
+    if (is.null(data_list[[current_index]])) {
+      # Use <<- to modify global variable (shared across sessions)
+      data_list[[current_index]] <<- read_data(json_data[[current_index]])
+      logging::loginfo("loaded dataset #%s.", current_index)
+    }
+  }, ignoreInit = TRUE, ignoreNULL = TRUE, priority = 100)
 
   #Return current organoid and update values
   organoid <- eventReactive({ current_dataset_index() }, {
