@@ -16,7 +16,8 @@ plot_inch <- 4
 dpi <- 125  # for web display. The saved plots have higher dpi
 fixed_plot_size <- dpi * plot_inch
 dotplot_height <- 500  # height in vertical layout (can expand to make it longer. )
-calc_pt_size <- function(n) {30 / n^0.5}
+# calc_pt_size <- function(n) {30 / n^0.5}
+calc_pt_size <- function(n) {100 / n^0.63}
 
 # png.arguments <- c(4,4,300)
 # rasterize_ncells <- 150000  # This might nor work for plotly. usually use ~2000. But now vector.friendly does not work for ggplot 3.0, so I disabled this.
@@ -79,7 +80,12 @@ read_data <- function(x) {
     )
 }
 
-data_list <- lapply(json_data, read_data)
+# data_list <- lapply(json_data, read_data)
+
+logging::loginfo("loading data...")
+data_list <- rep(list(NULL), length(json_data))
+data_list[[1]] <- read_data(json_data[[1]])
+logging::loginfo("loaded dataset #1.")
 
 
 # --------------------------
@@ -278,7 +284,13 @@ function(input, output, session) {
         input$dataset_1
     }, {
         if (input$dataset_1 %in% datasets) {
-            data1 <<- data_list[[as.numeric(input$dataset_1)]]
+            current_index <- as.numeric(input$dataset_1)
+            if (is.null(data_list[[current_index]])) {
+                # Use <<- to modify global variable (shared across sessions)
+                data_list[[current_index]] <<- read_data(json_data[[current_index]])
+                logging::loginfo("loaded dataset #%s.", current_index)
+            }
+            data1 <<- data_list[[current_index]]
         } else {
             data1 <<- NULL
         }
@@ -292,7 +304,13 @@ function(input, output, session) {
         input$dataset_2
     }, {
         if (input$dataset_2 %in% datasets) {
-            data2 <<- data_list[[as.numeric(input$dataset_2)]]
+            current_index <- as.numeric(input$dataset_2)
+            if (is.null(data_list[[current_index]])) {
+                # Use <<- to modify global variable (shared across sessions)
+                data_list[[current_index]] <<- read_data(json_data[[current_index]])
+                logging::loginfo("loaded dataset #%s.", current_index)
+            }
+            data2 <<- data_list[[current_index]]
         } else {
             data2 <<- NULL
         }
@@ -306,7 +324,13 @@ function(input, output, session) {
         input$dataset_3
     }, {
         if (input$dataset_3 %in% datasets) {
-            data3 <<- data_list[[as.numeric(input$dataset_3)]]
+            current_index <- as.numeric(input$dataset_3)
+            if (is.null(data_list[[current_index]])) {
+                # Use <<- to modify global variable (shared across sessions)
+                data_list[[current_index]] <<- read_data(json_data[[current_index]])
+                logging::loginfo("loaded dataset #%s.", current_index)
+            }
+            data3 <<- data_list[[current_index]]
         } else {
             data3 <<- NULL
         }
@@ -462,7 +486,7 @@ function(input, output, session) {
             pdf(file=NULL)
             p <- DotPlot2(data, color_scaling = "zero-one", size_scaling = "area",
                         genes.plot = genes, legend.position = "bottom", cols.use = c("white", "magenta"), do.return = T,
-                        dot.min=0.01, dot.scale = scaled_ptsize(), axis.label.size = 9 * scale_factor,
+                        dot.min=0.01, dot.scale = scaled_ptsize(), axis.label.size = 7 * scale_factor,
                         horizontal = FALSE) +
                         theme(legend.direction='vertical',
                               legend.text=element_text(size=7 * scale_factor),
