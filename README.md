@@ -8,7 +8,7 @@ Interactive visualization of single cell RNAseq datasets.
   - Specify pre-analyzed datasets ([Seurat 2 or 3](https://github.com/satijalab/seurat) format) in the JSON config file as data source. Easily switch between differen datasets.
 
 <p align="center"> 
-  <img src="assets/screenshot_human_testis_atlas.png">
+  <img src="assets/screenshot_human_testis_atlas.png" width="95%">
 </p>
 
 
