@@ -11,6 +11,9 @@ Interactive visualization of single cell RNAseq datasets.
   <img src="assets/screenshot_human_testis_atlas.png" width="95%">
 </p>
 
+Published data using this web app:
+
+  - [Human Testis Atlas Browser](https://humantestisatlas.shinyapps.io/humantestisatlas1/) -- Guo, et al. [The Dynamic Transcriptional Cell Atlas of Testis Development during Human Puberty](https://www.sciencedirect.com/science/article/pii/S1934590919305235), Cell Stem Cell, 2020
 
 ## Setting up and launch the App
   
