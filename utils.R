@@ -97,8 +97,11 @@ GetClusterPlot <- function(inputDataList, inputDataIndex, inputWidth, inputHeigh
   return(p)
 }
 
-GetPlotData <- function(inputDataObj, inputGene) {
-  single_gene <- mutate(inputDataObj$plot_df[, 1:2], gene = as.numeric(FetchData(inputDataObj$seurat_data, inputGene))) %>% arrange(gene)
+GetPlotData <- function(inputDataObj, inputGene, quantile=0.99) {
+  data <- as.numeric(FetchData(inputDataObj$seurat_data, inputGene))
+  cutoff <- quantile(x = data[data > 0], probs = quantile) 
+  data[data > cutoff] <- cutoff
+  single_gene <- mutate(inputDataObj$plot_df[, 1:2], gene = data) %>% arrange(gene)
   colnames(single_gene) = c("dim1", "dim2", "gene")
   return(single_gene)
 }
