@@ -7,6 +7,14 @@ Interactive visualization of single cell RNAseq datasets.
   - Select or click on a gene to show its expression on t-SNE/UMAP plots, select a cluster to show its marker genes.
   - Specify pre-analyzed datasets ([Seurat 2 or 3](https://github.com/satijalab/seurat) format) in the JSON config file as data source. Easily switch between differen datasets.
 
+<p align="center"> 
+  <img src="assets/screenshot_human_testis_atlas.png" width="95%">
+</p>
+
+Published data using this web app:
+
+  - [Human Testis Atlas Browser](https://humantestisatlas.shinyapps.io/humantestisatlas1/) -- Guo, et al. [The Dynamic Transcriptional Cell Atlas of Testis Development during Human Puberty](https://www.sciencedirect.com/science/article/pii/S1934590919305235), Cell Stem Cell, 2020
+
 ## Setting up and launch the App
   
   - Download the App, `git clone https://github.com/yueqiw/shiny_cell_browser.git`.
