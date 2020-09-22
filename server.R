@@ -50,6 +50,9 @@ read_data <- function(x) {
   #Parser additions
   full_embedding <- as.data.frame(GetDimReduction(seurat_data, reduction.type = x$embedding, slot = "cell.embeddings"))
   assign_clust <- as.data.frame(GetClusters(seurat_data))
+  if (is.factor(seurat_data@meta.data[[x$cluster]])) {
+    assign_clust[, 2] <- factor(assign_clust[, 2], levels = seurat_data@meta.data[[x$cluster]] %>% levels)
+  }
   colorVec = mapvalues(as.integer(assign_clust[, 2]), from = 1:length(colors), to = toupper(colors)) #1:length(colors)
   df_plot = cbind(full_embedding, assign_clust[, 2], colorVec)
   colnames(df_plot) = c("dim1", "dim2", "cluster", "colorVec")
