@@ -44,7 +44,7 @@ ui <- fluidPage(
               sidebarPanel(width = 2,
                             selectInput(inputId = "selected_dataset", label = "Dataset", choices = NULL),
                             selectizeInput(inputId = "selected_gene", label = "Gene", choices = NULL, options = list(placeholder = 'Select a gene')),
-                            textAreaInput(inputId = "gene_list", label = "Gene List", placeholder = "Up to 10,\n1 per line"),
+                            textAreaInput(inputId = "gene_list", label = "Gene List (up to 10 genes)", placeholder = "Up to 10,\n1 per line"),
                             fluidRow(column(12, actionButton(inputId = "gene_list_submit", label = "Dot plot genes"), align = "center")),
                             h5(strong("Table controls")),
                             fluidRow(column(12, actionButton(inputId = "reset_table", label = "Reset table"), align = "center")),
