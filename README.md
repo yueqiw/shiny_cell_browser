@@ -12,8 +12,8 @@ Interactive visualization of single cell RNAseq datasets.
 </p>
 
 Published data using this web app:
-
-  - [Human Testis Atlas Browser](https://humantestisatlas.shinyapps.io/humantestisatlas1/) -- Guo, et al. [The Dynamic Transcriptional Cell Atlas of Testis Development during Human Puberty](https://www.sciencedirect.com/science/article/pii/S1934590919305235), Cell Stem Cell, 2020
+  - [Human Organoid Single-Cell Browser](https://shcheglovitov.shinyapps.io/u_brain_browser/) -- Y Wang, et al. [Modeling autism-associated SHANK3 deficiency using human cortico-striatal organoids generated from single neural rosettes](https://www.biorxiv.org/content/10.1101/2021.01.25.428022v1), bioRxiv, 2021
+  - [Human Testis Atlas Browser](https://humantestisatlas.shinyapps.io/humantestisatlas1/) -- J Guo, et al. [The Dynamic Transcriptional Cell Atlas of Testis Development during Human Puberty](https://www.sciencedirect.com/science/article/pii/S1934590919305235), Cell Stem Cell, 2020
 
 ## Setting up and launch the App
   
