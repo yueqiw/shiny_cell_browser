@@ -180,19 +180,21 @@ GetDotPlot <- function(inputDataList, inputDataIndex, inputGeneList, inputWidth,
     #Calculate the average expression per gene per cluster
     avgs <- multiple_genes %>% group_by(cluster) %>% dplyr::summarise_all(funs(mean))
     #Normalize so max is 1, melt the dataframe so we can plot it, and max sure the clusters are factors for proper plotting
-    avgs <- melt(cbind(cluster = avgs$cluster, avgs %>% select(-cluster) %>% dplyr::mutate_all(funs(MaxMutate))), id.vars = c("cluster"))
+    avgs <- melt(cbind(cluster = avgs$cluster, avgs %>% select(-cluster)), id.vars = c("cluster"))
     colnames(avgs) = c("cluster", "gene", "average_expression")
+    avgs <- mutate(avgs, average_expression_relative = MaxMutate(average_expression))
     #avgs$cluster = as.factor(avgs$cluster)
 
     #Calculate the percent of cells that each gene was detected in per cluster
     p_above <- melt(multiple_genes %>% group_by(cluster) %>% dplyr::summarise_all(funs(PercentAbove)), id.vars = c("cluster"))
 
     #Combine the calculations
-    combined = cbind(avgs, percent_above = 100 * p_above[, 3] * scaleRatio(inputWidth))
+    combined = cbind(avgs, percent_above = 100 * p_above[, 3])
+    combined = cbind(combined, percent_above_scaled = 100 * p_above[, 3] * scaleRatio(inputWidth))
     #Reverse the row order so it plots correctly - from https://stat.ethz.ch/pipermail/r-help/2008-September/175012.html
     rev_combined <- combined[rev(rownames(combined)),]
     #Add the hover text
-    rev_combined <- mutate(rev_combined, hover_text = sprintf("Cluster: %s\nAvg. Expression: %0.3f\nPercent Cells: %0.2f", cluster, average_expression, percent_above))
+    rev_combined <- mutate(rev_combined, hover_text = sprintf("Cluster: %s\nAvg. Expression: %0.3f\nPercent Cells: %0.2f%%", cluster, average_expression, percent_above))
 
     y_ax <- list(
       title = "",
@@ -228,7 +230,7 @@ GetDotPlot <- function(inputDataList, inputDataIndex, inputGeneList, inputWidth,
       height = inputHeight, 
       text = ~hover_text, 
       hoverinfo = "text", 
-      marker = list(symbol = "circle", size = rev_combined$percent_above, sizemode = "area", color = ~average_expression)
+      marker = list(symbol = "circle", size = rev_combined$percent_above_scaled, sizemode = "area", color = ~average_expression_relative)
     ) %>%
     layout(
       title = 'Dot Plot',
