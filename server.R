@@ -244,7 +244,7 @@ server <- function(input, output, session) {
 
   #Update the dot plot with new gene list
   observeEvent(c({ input$gene_list_submit }, { current_dataset_index() }), {
-    gene_listy <- trimws(strsplit(toupper(input$gene_list), '\n')[[1]])
+    gene_listy <- trimws(strsplit(input$gene_list, '\n')[[1]])
     filtered_gene_list <- get_shared_genes(gene_listy, organoid()$genes, 10)
     updateTextAreaInput(session, "hidden_gene_list", value = paste(filtered_gene_list, collapse = ","))
   })
