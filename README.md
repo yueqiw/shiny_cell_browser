@@ -3,7 +3,7 @@
 
 Interactive visualization of single cell RNAseq datasets. 
 
-  - Visualize cluster distribution, marker gene expression, and cluster-averaged expression of lists of genes. 
+  - Visualize cluster distribution, marker gene expression levels. 
   - Select or click on a gene to show its expression on t-SNE/UMAP plots, select a cluster to show its marker genes.
   - Specify pre-analyzed datasets ([Seurat v2 or v3](https://github.com/satijalab/seurat) format) in the JSON config file. 
 
@@ -18,7 +18,7 @@ Published data using this web app:
 ## Setting up the Single Cell Browser
   
   - Download the source code -- `git clone https://github.com/yueqiw/shiny_cell_browser.git`.
-  - Install package dependencies listed in [requirements.txt]().
+  - Install package dependencies listed in [requirements.txt](requirements.txt).
     - The app has been tested in R version 3.6.3.
     - Seurat v2.3.4 and v3.1.0 are supported. These versions can be installed following the official [instructions](https://satijalab.org/seurat/articles/install.html).
   - Prepare Seurat data
@@ -28,22 +28,21 @@ Published data using this web app:
     - The Seurat object should contain a 2D cell embedding created using t-SNE or UMAP.
     - The `@meta.data` table should use cell names as row names and contain a column that indicates the cluster id for each cell. Optionally, the display color of each cluster  can be stored as a named vector in `@misc`. For examples, if the clusters are stored as `seurat_data@meta.data$my_clusters`, their colors can be stored as `seurat_data@misc$my_clusters_colors`.
     - Store the marker gene differential expression table in a `.csv` file in the [`data/`](data/) folder. The table must contain two columns named `gene` and `cluster`. Other columns may have any name.
-  - Specify the visualization config and file paths by creating a `data/config.json` file. Follow the example in [`data/example_config.json`](data/example_config.json).
+  - Specify the visualization config and data file paths by creating a `data/config.json` file. Follow the example in [`data/example_config.json`](data/example_config.json). Multiple datasets can be configured in the same browser.
 
-## Launching the Single Cell Browser app
+## Launching the Single Cell Browser locally
   - Set the working directory (e.g. `cd shiny_cell_browser` in command line, or `setwd` in Rstudio)
-  - Launch the Single Cell Browser locally. Run `./run_app.sh` in the comand line, or `shiny::runApp()` in Rstudio, .  
+  - Launch the Single Cell Browser locally. Run `./run_app.sh` in the comand line, or `shiny::runApp()` in Rstudio.  
   - This should launch the browser on the local computer at `http://127.0.0.1:4894/`. The port number can be changed (e.g. `shiny::runApp(port=1234)`). 
   - For other computers in the local network to access the web app, specify `host='0.0.0.0', port=1234` in the `runApp` call, then visit `http://your-ip-address:1234`.
   
 ## Deploy the Single Cell Browser
-  - The App can be deployed on a web server using Docker or [shinyapps.io](https://www.shinyapps.io). [shinyapps.io](https://www.shinyapps.io) supports both free and paid servers.
-  - To set up a [shinyapps.io](https://www.shinyapps.io) account and learn how to deploy a Shiny app, follow this [tutorial](https://shiny.rstudio.com/articles/shinyapps.html)
+  - The App can be easily deployed on a web server using [shinyapps.io](https://www.shinyapps.io), which supports both free and paid servers. Docker is an alternative approach but takes longer to set up.
+  - To set up a [shinyapps.io](https://www.shinyapps.io) account and learn how to deploy a Shiny app, follow this [tutorial](https://shiny.rstudio.com/articles/shinyapps.html).
   - After setting up the account, deploy the app by [`rsconnect::deployApp()`](https://www.rdocumentation.org/packages/rsconnect/versions/0.8.18/topics/deployApp).
 
 If you encounter the following error: `Error parsing manifest: Unable to determine package source for Bioconductor package Biobase: Repository must be specified`, run this before deployApp: `options(repos = BiocManager::repositories()`
 
-```
   
 ## Updates
 
