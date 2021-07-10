@@ -1,0 +1,15 @@
+Seurat==2.3.4 or 3.1.0
+rsconnect==0.8.16
+shiny==1.5.0
+shinyjs==2.0.0
+shinythemes==1.1.2
+plotly==4.9.2.1
+DT==0.15
+plyr==1.8.6
+dplyr==1.0.2
+ggplot2==3.3.2
+reshape2==1.4.4
+rlist==0.4.6.1
+varhandle==2.0.5
+logging==0.10.108
+rjson==0.2.20
