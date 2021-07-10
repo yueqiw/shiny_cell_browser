@@ -23,6 +23,10 @@ MaxMutate <- function(x) {
   return(x / max(x))
 }
 
+IsSeurat2 <- function() {
+  return (packageVersion("Seurat") < 3)
+}
+
 get_shared_genes <- function(inputGeneList1, inputGeneList2, topN) {
   gene_list1 = dplyr::distinct(as.data.frame(inputGeneList1) %>% mutate_if(is.factor, as.character))
   gene_list2 = dplyr::distinct(as.data.frame(inputGeneList2) %>% mutate_if(is.factor, as.character))
@@ -30,6 +34,27 @@ get_shared_genes <- function(inputGeneList1, inputGeneList2, topN) {
   colnames(gene_list2) = c("gene")
   shared <- dplyr::semi_join(as.data.frame(gene_list1), as.data.frame(gene_list2), by = "gene")
   return(dplyr::top_n(shared, topN)$gene)
+}
+
+FetchGenes <- function(
+  object,
+  vars.all = NULL
+) {
+  if (IsSeurat2()) {
+    return(FetchData(object, vars.all))
+  }
+  cells.use <- colnames(object)
+  gene.check <- vars.all %in% rownames(GetAssayData(object))
+  if (!all(gene.check)) {
+    for (my.var in vars.all) {
+      if (!(my.var %in% rownames(GetAssayData(object)))) {
+        stop(paste("Error:", my.var, "not found"))
+      }
+    }
+  }
+  data.expression <- GetAssayData(object)
+  data.expression <- t(as.matrix(data.expression[vars.all[gene.check], cells.use, drop=FALSE]))
+  return(as.matrix(x = data.expression))
 }
 
 ##Helper plotting functions
@@ -98,7 +123,7 @@ GetClusterPlot <- function(inputDataList, inputDataIndex, inputWidth, inputHeigh
 }
 
 GetPlotData <- function(inputDataObj, inputGene, quantile=0.99) {
-  data <- as.numeric(FetchData(inputDataObj$seurat_data, inputGene))
+  data <- as.numeric(FetchGenes(inputDataObj$seurat_data, inputGene))
   cutoff <- quantile(x = data[data > 0], probs = quantile) 
   data[data > cutoff] <- cutoff
   single_gene <- mutate(inputDataObj$plot_df[, 1:2], gene = data) %>% arrange(gene)
@@ -173,7 +198,7 @@ GetDotPlot <- function(inputDataList, inputDataIndex, inputGeneList, inputWidth,
   }
   else {
     #Get the gene expression values and scale them so the max value for each gene is 1
-    gene_exp = FetchData(inputDataObj$seurat_data, inputGeneList)
+    gene_exp = FetchGenes(inputDataObj$seurat_data, inputGeneList)
     #Combine the cluster assignments with the gene expression data
     multiple_genes <- as.data.frame(cbind(cluster = as.character(inputDataObj$plot_df$cluster), as.data.frame(gene_exp)))
 
