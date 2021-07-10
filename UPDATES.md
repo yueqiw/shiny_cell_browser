@@ -1,4 +1,14 @@
 ## Updates
+
+2021
+Merged Seurat v2 and v3 support into the same code base.
+Bug fixes.
+
+2019~2020
+Added support for Seurat 3.
+Added more options in the config.
+Bug fixes.
+
 08-15-2018
   - Full application rewrite for speed and simplicity in viewing only 1 dataset at a time.  Table added for differential expression navigation.  Download features still need to be re-implemented.
 
