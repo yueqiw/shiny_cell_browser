@@ -76,6 +76,10 @@ read_data <- function(x) {
   xScaleRatio_clusterPlot = y_range / x_domain
   yScaleRatio_clusterPlot = x_domain / y_range
   coords_title = group_by(df_plot, cluster) %>% dplyr::summarize(x_center = mean(dim1), y_center = mean(dim2))
+  if (!is.null(x$label_coordinates)) {
+    coords_title <- dplyr::bind_rows(x$label_coordinates)
+    colnames(coords_title) <- c("cluster", "x_center", "y_center")
+  }
 
   #Add the full description name on mouse over
   if (is.null(x$cluster_name_mapping)) {
