@@ -28,7 +28,20 @@ Published data using this web app:
     - The Seurat object should contain a 2D cell embedding created using t-SNE or UMAP.
     - The `@meta.data` table should use cell names as row names and contain a column that indicates the cluster id for each cell. Optionally, the display color of each cluster  can be stored as a named vector in `@misc`. For examples, if the clusters are stored as `seurat_data@meta.data$my_clusters`, their colors can be stored as `seurat_data@misc$my_clusters_colors`.
     - Store the marker gene differential expression table in a `.csv` file in the [`data/`](data/) folder. The table must contain two columns named `gene` and `cluster`. Other columns may have any name.
-  - Specify the visualization config and data file paths by creating a `data/config.json` file. Follow the example in [`data/example_config.json`](data/example_config.json). Multiple datasets can be configured in the same browser.
+  - Specify the visualization config and data file paths by creating a `data/config.json` file and following the example in [`data/example_config.json`](data/example_config.json). 
+    - Multiple datasets can be configured in the same browser.
+    - The browser-level config includes the browser title and url link
+    - The dataset-level config options are listed below:
+      - `name`: the dataset name.
+      - `file`: the `.rds` file path.
+      - `cluster`: the name of the column containing the displayed cluster ids.
+      - `embedding`: the type of 2D embedding (e.g. tsne or umap).
+      - `diff_ex_cluster`: the name of the `@meta.data` cluster id column that corresponds to the cluster ids in the differential expression `csv` file. In most cases, this is the same as `cluster`.
+      - `diff_ex_file`: the marker gene differential expression `csv` file.
+      - `cluster_name_mapping` (optional): a mapping from the Seurat cluster ids to more readable cluster names.
+      - `pt_size` (optional): if set, overrides the automatically computed point size in embedding plots.
+      - `font_scale` (optional): if set, scales the font size of cluster labels by this factor.
+      - `label_coordinates` (optional): if set, the cluster labels will be placed at these coordinates rather than at the center of each cluster.
 
 ## Launching the Single Cell Browser locally
   - Set the working directory (e.g. `cd shiny_cell_browser` in command line, or `setwd` in Rstudio)
