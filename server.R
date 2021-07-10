@@ -24,14 +24,70 @@ names(dataset_selector) <- c(dataset_names)
 #Read the config data
 config <- json_file$config
 
-#Now read in the data
+IsSeurat2 <- function() {
+  return (packageVersion("Seurat") < 3)
+}
+
+SetAllIdent <- function(object, ids) {
+  if (IsSeurat2()) {
+    return(Seurat::SetAllIdent(object, ids))
+  }
+  Idents(object) <- ids
+  return(object)
+}
+
+GetClusters <- function(object) {
+  if (IsSeurat2()) {
+    return(Seurat::GetClusters(object))
+  }
+  clusters <- data.frame(cell.name = names(object@active.ident), cluster = as.character(object@active.ident))
+  rownames(clusters) <- NULL
+  clusters$cell.name <- as.character(clusters$cell.name)
+  return(clusters)
+}
+
+GetDimReduction <- function(object, reduction.type = "umap", slot = "cell.embeddings") {
+  if (IsSeurat2()) {
+    return(Seurat::GetDimReduction(object, reduction.type = reduction.type, slot = slot))
+  }
+  reduction <- object[[reduction.type]]
+  return(eval(expr = parse(text = paste0("reduction", "@", slot))))
+}
+
+GetCellNames <- function(object) {
+  if (IsSeurat2()) {
+    return(object@cell.names)
+  } else {
+    return(colnames(object))
+  }
+}
+
+GetActiveIdent <- function(object) {
+  if (IsSeurat2()) {
+    return(object@ident)
+  } else {
+    return(object@active.ident)
+  }
+}
+
+GetAssayData <- function(object) {
+  if (IsSeurat2()) {
+    return(object@data)
+  } else {
+    return(Seurat::GetAssayData(object))
+  }
+}
+
 calc_pt_size <- function(n) { 25 / n ^ 0.33 }
+
+#Now read in the data
 read_data <- function(x) {
   # load data and metadata specified by the JSON string.
   # x: individual json string, with [name, file, clusters embedding]
   seurat_data <- readRDS(x$file)
   seurat_data <- SetAllIdent(seurat_data, x$cluster)
-  ncells <- length(seurat_data@cell.names)
+  ncells <- length(GetCellNames(seurat_data))
+  
   pt_size <- calc_pt_size(ncells)
   if (!is.null(x$pt_size)) {
     pt_size <- x$pt_size
@@ -43,9 +99,9 @@ read_data <- function(x) {
   colors <- seurat_data@misc[[sprintf("%s_colors", x$cluster)]]
   if (is.null(colors)) {
     set.seed(2)
-    colors <- sample(rainbow(n_distinct(seurat_data@ident)))
+    colors <- sample(rainbow(n_distinct(GetActiveIdent(seurat_data))))
   }
-  genes <- sort(rownames(seurat_data@data))
+  genes <- sort(rownames(GetAssayData(seurat_data)))
 
   #Parser additions
   full_embedding <- as.data.frame(GetDimReduction(seurat_data, reduction.type = x$embedding, slot = "cell.embeddings"))
@@ -61,10 +117,14 @@ read_data <- function(x) {
   xScaleRatio_clusterPlot = y_range / x_domain
   yScaleRatio_clusterPlot = x_domain / y_range
   coords_title = group_by(df_plot, cluster) %>% dplyr::summarize(x_center = mean(dim1), y_center = mean(dim2))
+  if (!is.null(x$label_coordinates)) {
+    coords_title <- dplyr::bind_rows(x$label_coordinates)
+    colnames(coords_title) <- c("cluster", "x_center", "y_center")
+  }
 
   #Add the full description name on mouse over
   if (is.null(x$cluster_name_mapping)) {
-    cluster_names <- seurat_data@ident %>% levels()
+    cluster_names <- GetActiveIdent(seurat_data) %>% levels()
     names(cluster_names) <- cluster_names
     x$cluster_name_mapping <- as.list(cluster_names)
   }
@@ -83,11 +143,9 @@ read_data <- function(x) {
     merged = dplyr::left_join(assign_clust, assign_clust2, by = "cell.name")
     keyMap = distinct(merged %>% select(cluster.x, cluster.y))
 
-    plot_tab$cluster = as.character(mapvalues(plot_tab$cluster, from = as.integer(keyMap$cluster.y), to = as.character(keyMap$cluster.x)))
-    seurat_data2 <- SetAllIdent(seurat_data, x$cluster)
+    plot_tab$cluster = as.character(mapvalues(as.character(plot_tab$cluster), from = as.character(keyMap$cluster.y), to = as.character(keyMap$cluster.x)))
+    seurat_data <- SetAllIdent(seurat_data, x$cluster)
   }
-
-
 
   return(
     list(
@@ -295,7 +353,7 @@ server <- function(input, output, session) {
                       list(
                         list(responsivePriority = 1, targets = important_columns),
                         list(
-                          render = JS(
+                          render = DT::JS(
                             "function(data, type, row, meta) {",
                             "return type === 'display'?",
                             "'<a href=\"https://www.genecards.org/cgi-bin/carddisp.pl?gene=' + data + '\">' + data + '</a>' : data;",
