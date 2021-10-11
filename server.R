@@ -7,6 +7,7 @@ library(varhandle)
 library(DT)
 library(rlist)
 library(logging)
+library(scales)
 source("utils.R")
 
 #Start to read in the config file.
@@ -99,7 +100,7 @@ read_data <- function(x) {
   colors <- seurat_data@misc[[sprintf("%s_colors", x$cluster)]]
   if (is.null(colors)) {
     set.seed(2)
-    colors <- sample(rainbow(n_distinct(GetActiveIdent(seurat_data))))
+    colors <- sample(hue_pal()(n_distinct(GetActiveIdent(seurat_data))))
   }
   genes <- sort(rownames(GetAssayData(seurat_data)))
 
