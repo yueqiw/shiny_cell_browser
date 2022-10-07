@@ -8,12 +8,13 @@ Interactive visualization of single cell RNAseq datasets.
   - Specify pre-analyzed datasets ([Seurat v2 or v3](https://github.com/satijalab/seurat) format) in the JSON config file. 
 
 <p align="center"> 
-  <img src="assets/screenshot_human_testis_atlas.png" width="95%">
+  <img src="assets/screenshot_human_brain_organoids.png" width="100%">
 </p>
 
 Published data using this web app:
-  - [Human Organoid Single-Cell Browser](https://shcheglovitov.shinyapps.io/u_brain_browser/) -- Y Wang, et al. [Modeling autism-associated SHANK3 deficiency using human cortico-striatal organoids generated from single neural rosettes](https://www.biorxiv.org/content/10.1101/2021.01.25.428022v1), bioRxiv, 2021
+  - [Human Organoid Single-Cell Browser](https://shcheglovitov.shinyapps.io/u_brain_browser/) -- Y Wang, et al. [Modeling human telencephalic development and autism-associated SHANK3 deficiency using organoids generated from single neural rosettes](https://www.nature.com/articles/s41467-022-33364-z), Nature Communications, 2022
   - [Human Testis Atlas Browser](https://humantestisatlas.shinyapps.io/humantestisatlas1/) -- J Guo, et al. [The Dynamic Transcriptional Cell Atlas of Testis Development during Human Puberty](https://www.sciencedirect.com/science/article/pii/S1934590919305235), Cell Stem Cell, 2020
+  - [Fluorescent cells isolated from Zebrafish Tg(olig2:dsred)](https://nantongneurokeylab.shinyapps.io/cell_browser/) - L Xing, et al. [Expression of myelin transcription factor 1 and lamin B receptor mediate neural progenitor fate transition in the zebrafish spinal cord pMN domain](https://www.sciencedirect.com/science/article/pii/S002192582200895X), J. Biological Chemistry, 2022
 
 ## Setting up the Single Cell Browser
   
